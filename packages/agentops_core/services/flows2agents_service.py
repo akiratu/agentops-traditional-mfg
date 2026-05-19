@@ -11,6 +11,8 @@ from pathlib import Path
 from typing import Sequence
 from uuid import uuid4
 
+from flows2agents.evolve.models import EvolutionReport, FailureCase, RegressionReport
+from flows2agents.evolve.pipeline import evolve_skill as f2a_evolve_skill
 from flows2agents.ir import RawSource, SkillIR
 from flows2agents.llm.base import LLMProvider
 from flows2agents.pipeline import PipelineInputs, PipelineResult, run as f2a_run
@@ -19,6 +21,7 @@ from flows2agents.portfolio.builder import build_portfolio as f2a_build_portfoli
 from flows2agents.portfolio.decomposer import decompose as f2a_decompose
 
 from agentops_core.models.agent import Agent
+from agentops_core.models.skill import Skill
 from agentops_core.models.sop_source import SOPSource
 from agentops_core.services.storage import LocalStorage
 
@@ -149,3 +152,43 @@ def generate_portfolio(
         "plan": plan.model_dump(),
         "built_skills": built_skills,
     }
+
+
+def self_evolve_skill(
+    *,
+    skill: Skill,
+    failures: Sequence[FailureCase],
+    storage: LocalStorage,
+    provider: LLMProvider,
+) -> tuple[SkillIR, EvolutionReport, RegressionReport, str]:
+    """Run flows2agents Self-Evolve on an existing skill with given failure cases.
+
+    The caller must ensure `skill.generated_by_run_id` is set. By convention
+    (see generate_single_skill) that value is a relative path from storage.root
+    pointing at the previous skill_dir (e.g. "skills/f2a-abc/yield-drop-rca").
+
+    Returns:
+        (new_skill_ir, evolution_report, regression_report, new_skill_dir_relative)
+        where new_skill_dir_relative is the relative path from storage.root to
+        the new skill's directory (same convention as generate_single_skill).
+    """
+    if not skill.generated_by_run_id:
+        raise ValueError(f"Skill {skill.id} has no generated_by_run_id; cannot evolve")
+
+    old_skill_dir = storage.resolve(skill.generated_by_run_id)
+    new_run_bucket = f"f2a-evolve-{uuid4().hex[:12]}"
+    new_out_dir = storage.dir_for(f"skills/{new_run_bucket}")
+    new_out_dir.parent.mkdir(parents=True, exist_ok=True)
+
+    result = f2a_evolve_skill(
+        skill_dir=old_skill_dir,
+        failures=list(failures),
+        provider=provider,
+        out_dir=new_out_dir,
+        targets=["claude-skill"],
+        force=True,
+        run_eval_after=True,
+        run_regression_after=True,
+    )
+    new_skill_dir_relative = str(result.new_skill_dir.relative_to(storage.root))
+    return result.new_ir, result.report, result.regression_report, new_skill_dir_relative
