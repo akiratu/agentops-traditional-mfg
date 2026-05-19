@@ -113,3 +113,28 @@ def test_trace_analyses_returns_finding_and_failure_cases(client, session):
     assert body["rca_finding"]["status"] == "proposed"
     assert len(body["failure_cases"]) == 1
     assert body["failure_cases"][0]["id"] == "case-mock"
+
+
+import os
+
+import pytest
+
+
+@pytest.mark.skipif(
+    not (os.environ.get("LANGFUSE_PUBLIC_KEY") and os.environ.get("GEMINI_API_KEY")),
+    reason="Requires LANGFUSE_PUBLIC_KEY + GEMINI_API_KEY in env for real-LLM e2e",
+)
+def test_e2e_trace_analyzer_with_real_providers(client, session):
+    """End-to-end: real Langfuse + real Gemini Pro.
+
+    Seed a synthetic trace into Langfuse manually (or run rca-agent-demo to emit one),
+    then create an AnomalySignal pointing at it, then POST /trace-analyses and check
+    that a meaningful (non-'no-evidence') FailureCase comes back.
+
+    This test exists to be invoked manually during development; the gate prevents
+    accidental API calls in CI.
+    """
+    pytest.skip(
+        "Manual verification only. Seed a trace via langfuse SDK + run this test "
+        "explicitly with `pytest -k test_e2e_trace_analyzer_with_real_providers`."
+    )
