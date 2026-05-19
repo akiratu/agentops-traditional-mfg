@@ -11,9 +11,12 @@ from pathlib import Path
 from typing import Sequence
 from uuid import uuid4
 
-from flows2agents.ir import SkillIR
+from flows2agents.ir import RawSource, SkillIR
 from flows2agents.llm.base import LLMProvider
 from flows2agents.pipeline import PipelineInputs, PipelineResult, run as f2a_run
+from flows2agents.portfolio.builder import BuildOptions
+from flows2agents.portfolio.builder import build_portfolio as f2a_build_portfolio
+from flows2agents.portfolio.decomposer import decompose as f2a_decompose
 
 from agentops_core.models.agent import Agent
 from agentops_core.models.sop_source import SOPSource
@@ -70,3 +73,79 @@ def generate_single_skill(
     skill_dir_relative = str(result.skill_dir.relative_to(storage.root))
     skill_ir = SkillIR.model_validate_json(result.ir_path.read_text(encoding="utf-8"))
     return skill_ir, result, skill_dir_relative
+
+
+def generate_portfolio(
+    *,
+    factory_description: str,
+    sop_sources: Sequence[SOPSource],
+    storage: LocalStorage,
+    provider: LLMProvider,
+) -> dict:
+    """Run flows2agents portfolio mode.
+
+    Returns a dict with shape:
+    {
+      "run_id": "f2a-portfolio-<hex>",
+      "plan": <PortfolioPlan as dict>,
+      "built_skills": [
+        {
+          "agent_name": "...",
+          "agent_display_name": "...",
+          "skill_name": "...",
+          "skill_ir": {...},
+        },
+        ...
+      ],
+    }
+
+    The caller (API layer) is responsible for translating this into Agent + Skill DB rows.
+
+    NOTE: decompose() takes list[RawSource] (not file paths). Each SOPSource's
+    content is read from disk and wrapped as a RawSource(kind="doc").
+    build_portfolio() returns a PortfolioIR; we unpack PortfolioIR.agents[].skills[].
+    """
+    run_id = f"f2a-portfolio-{uuid4().hex[:12]}"
+
+    # Build RawSource list: one description from factory_description, plus one
+    # "doc" RawSource per SOP file.
+    raw_sources: list[RawSource] = [
+        RawSource(kind="description", name="factory-description", text=factory_description),
+    ]
+    for sop in sop_sources:
+        doc_path = storage.resolve(sop.storage_ref)
+        text = doc_path.read_text(encoding="utf-8", errors="replace")
+        raw_sources.append(RawSource(kind="doc", name=doc_path.stem, text=text))
+
+    plan = f2a_decompose(
+        sources=raw_sources,
+        provider=provider,
+    )
+
+    portfolio_ir = f2a_build_portfolio(
+        plan=plan,
+        sources=raw_sources,
+        provider=provider,
+        options=BuildOptions(),
+    )
+
+    # Flatten PortfolioIR → list of per-skill dicts, keyed by agent info.
+    built_skills = []
+    for agent_ir in portfolio_ir.agents:
+        for skill_ir in agent_ir.skills:
+            built_skills.append(
+                {
+                    "agent_name": agent_ir.name,
+                    "agent_display_name": agent_ir.display_name,
+                    "agent_role": agent_ir.role,
+                    "agent_scope": agent_ir.scope,
+                    "skill_name": skill_ir.name,
+                    "skill_ir": skill_ir.model_dump(),
+                }
+            )
+
+    return {
+        "run_id": run_id,
+        "plan": plan.model_dump(),
+        "built_skills": built_skills,
+    }
