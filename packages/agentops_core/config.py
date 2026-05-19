@@ -25,6 +25,10 @@ class Settings(BaseSettings):
         default="",
         description="Google Gemini API key (also accepts GOOGLE_API_KEY)",
     )
+    gemini_model: str = Field(
+        default="gemini-2.5-flash",
+        description="Gemini model name. Try 'gemini-2.5-pro' for stronger tool-calling.",
+    )
 
 
 @lru_cache

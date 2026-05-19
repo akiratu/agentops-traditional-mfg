@@ -53,7 +53,7 @@ def build_provider(settings: Settings) -> LLMProvider:
         try:
             from flows2agents.llm.google import GoogleProvider
 
-            return GoogleProvider()
+            return GoogleProvider(model=settings.gemini_model)
         except ImportError:
             log.warning("google provider unavailable; falling back to fake provider")
             return FakeLLMProvider()
