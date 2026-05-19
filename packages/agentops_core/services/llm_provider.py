@@ -44,6 +44,20 @@ def build_provider(settings: Settings) -> LLMProvider:
             log.warning("openai SDK not installed; falling back to fake provider")
             return FakeLLMProvider()
 
+    if name == "google" and settings.gemini_api_key:
+        # Gemini provider reads GEMINI_API_KEY / GOOGLE_API_KEY from os.environ.
+        # Mirror settings.gemini_api_key into env so the provider can find it.
+        import os
+
+        os.environ.setdefault("GEMINI_API_KEY", settings.gemini_api_key)
+        try:
+            from flows2agents.llm.google import GoogleProvider
+
+            return GoogleProvider()
+        except ImportError:
+            log.warning("google provider unavailable; falling back to fake provider")
+            return FakeLLMProvider()
+
     if name == "ollama":
         try:
             from flows2agents.llm.ollama import OllamaProvider
