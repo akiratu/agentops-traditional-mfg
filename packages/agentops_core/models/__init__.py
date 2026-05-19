@@ -11,6 +11,12 @@ from agentops_core.models.agent import (
     AgentRead,
     RuntimeStatus,
 )
+from agentops_core.models.sop_source import (
+    SOPSource,
+    SOPSourceCreate,
+    SOPSourceRead,
+    SOPSourceType,
+)
 
 __all__ = [
     "TimestampedModel",
@@ -22,4 +28,8 @@ __all__ = [
     "AgentCreate",
     "AgentRead",
     "RuntimeStatus",
+    "SOPSource",
+    "SOPSourceCreate",
+    "SOPSourceRead",
+    "SOPSourceType",
 ]
