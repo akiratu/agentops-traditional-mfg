@@ -50,6 +50,32 @@ pytest
 | Langfuse UI | http://localhost:3000 (login: dev@agentops.local / dev_password) |
 | Postgres | localhost:5432 (agentops / agentops_dev) |
 
+## API endpoints (v0.2)
+
+### Resource CRUD
+
+- `GET /factories`, `POST /factories`, `GET /factories/{id}`
+- `GET /agents`, `POST /agents`, `GET /agents/{id}` (filter by factory_id)
+- `GET /skills`, `POST /skills`, `GET /skills/{id}` (filter by agent_id)
+- `GET /sop-sources`, `POST /sop-sources`, `GET /sop-sources/{id}`
+- `GET /anomaly-signals`, `POST /anomaly-signals`, `GET /anomaly-signals/{id}`
+- `GET /rca-findings`, `POST /rca-findings`, `GET /rca-findings/{id}`,
+  `PATCH /rca-findings/{id}/status`
+- `GET /regression-runs`, `POST /regression-runs`, `GET /regression-runs/{id}`
+
+### flows2agents orchestration (Plan 2)
+
+- `POST /factories/{factory_id}/sop-uploads` — multipart upload, creates SOPSource
+- `POST /skill-generations` — { agent_id, sop_source_ids } → Skill (v_next, draft)
+- `POST /portfolio-generations` — { factory_id, sop_source_ids, description } →
+  N Agents × M Skills (drafts). Requires a real structured-output LLM provider.
+- `POST /self-evolutions` — { skill_id, failure_cases } → Skill (v_next, draft) +
+  RegressionRun. Requires a real LLM provider.
+
+The Self-Evolve endpoint defines the contract that Plan 3's Trace Analyzer
+will populate: it consumes `FailureCase` objects (id, query, expected_outcome,
+actual_outcome, context).
+
 ## Project structure
 
 ```
@@ -69,8 +95,8 @@ agentops-traditional-mfg/
 
 | Plan | Phase | Status |
 |---|---|---|
-| Plan 1 (this) | W1-2 Foundation | This plan |
-| Plan 2 | W3-4 flows2agents service wrapper | TBD |
+| Plan 1 | W1-2 Foundation | ✅ Done |
+| Plan 2 | W3-4 flows2agents service wrapper | ✅ Done |
 | Plan 3 | W5-6 Trace Analyzer + Langfuse | TBD |
 | Plan 4 | W7-8 Anomaly Detector | TBD |
 | Plan 5 | W9-11 Developer UI (Next.js) | TBD |
