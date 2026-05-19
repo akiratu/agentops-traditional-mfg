@@ -25,13 +25,19 @@ class RegressionRun(TimestampedModel, table=True):
 
     skill_id_old: UUID = Field(foreign_key="skill.id", nullable=False, index=True)
     skill_id_new: UUID = Field(foreign_key="skill.id", nullable=False, index=True)
-    test_set_strategy: TestSetStrategy = Field(default=TestSetStrategy.MIXED, nullable=False)
+    test_set_strategy: TestSetStrategy = Field(
+        default=TestSetStrategy.MIXED, nullable=False
+    )
     test_case_count: int = Field(default=0, nullable=False)
     pass_count: int = Field(default=0, nullable=False)
     fail_count: int = Field(default=0, nullable=False)
-    per_case_results: list[dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    per_case_results: list[dict[str, Any]] = Field(
+        default_factory=list, sa_column=Column(JSON)
+    )
     regression_findings: list[str] = Field(default_factory=list, sa_column=Column(JSON))
-    verdict: RegressionVerdict = Field(default=RegressionVerdict.NEEDS_REVIEW, nullable=False)
+    verdict: RegressionVerdict = Field(
+        default=RegressionVerdict.NEEDS_REVIEW, nullable=False
+    )
 
 
 class RegressionRunCreate(SQLModel):

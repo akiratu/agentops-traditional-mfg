@@ -1,11 +1,25 @@
 def _create_signal(client):
-    factory_id = client.post("/factories", json={"name": "F1", "deployment_type": "on_prem"}).json()["id"]
-    agent_id = client.post("/agents", json={
-        "factory_id": factory_id, "name": "A1", "purpose": "p", "runtime_status": "pending",
-    }).json()["id"]
-    return client.post("/anomaly-signals", json={
-        "agent_id": agent_id, "source_type": "metric_drift", "related_trace_refs": [], "status": "new",
-    }).json()["id"]
+    factory_id = client.post(
+        "/factories", json={"name": "F1", "deployment_type": "on_prem"}
+    ).json()["id"]
+    agent_id = client.post(
+        "/agents",
+        json={
+            "factory_id": factory_id,
+            "name": "A1",
+            "purpose": "p",
+            "runtime_status": "pending",
+        },
+    ).json()["id"]
+    return client.post(
+        "/anomaly-signals",
+        json={
+            "agent_id": agent_id,
+            "source_type": "metric_drift",
+            "related_trace_refs": [],
+            "status": "new",
+        },
+    ).json()["id"]
 
 
 def test_create_rca_finding(client):
@@ -29,12 +43,18 @@ def test_create_rca_finding(client):
 
 def test_list_findings_for_signal(client):
     signal_id = _create_signal(client)
-    client.post("/rca-findings", json={
-        "anomaly_signal_id": signal_id,
-        "root_cause_summary": "...",
-        "evidence": {}, "suggested_fix_type": "prompt_change",
-        "suggested_fix_payload": {}, "confidence_score": 0.5, "status": "proposed",
-    })
+    client.post(
+        "/rca-findings",
+        json={
+            "anomaly_signal_id": signal_id,
+            "root_cause_summary": "...",
+            "evidence": {},
+            "suggested_fix_type": "prompt_change",
+            "suggested_fix_payload": {},
+            "confidence_score": 0.5,
+            "status": "proposed",
+        },
+    )
     response = client.get(f"/rca-findings?anomaly_signal_id={signal_id}")
     assert response.status_code == 200
     assert len(response.json()) == 1
@@ -42,12 +62,20 @@ def test_list_findings_for_signal(client):
 
 def test_accept_finding(client):
     signal_id = _create_signal(client)
-    finding_id = client.post("/rca-findings", json={
-        "anomaly_signal_id": signal_id,
-        "root_cause_summary": "...",
-        "evidence": {}, "suggested_fix_type": "prompt_change",
-        "suggested_fix_payload": {}, "confidence_score": 0.5, "status": "proposed",
-    }).json()["id"]
-    response = client.patch(f"/rca-findings/{finding_id}/status", json={"status": "accepted"})
+    finding_id = client.post(
+        "/rca-findings",
+        json={
+            "anomaly_signal_id": signal_id,
+            "root_cause_summary": "...",
+            "evidence": {},
+            "suggested_fix_type": "prompt_change",
+            "suggested_fix_payload": {},
+            "confidence_score": 0.5,
+            "status": "proposed",
+        },
+    ).json()["id"]
+    response = client.patch(
+        f"/rca-findings/{finding_id}/status", json={"status": "accepted"}
+    )
     assert response.status_code == 200
     assert response.json()["status"] == "accepted"

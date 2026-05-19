@@ -10,7 +10,9 @@ router = APIRouter(prefix="/factories", tags=["factory"])
 
 
 @router.post("", response_model=FactoryRead, status_code=status.HTTP_201_CREATED)
-def create_factory(payload: FactoryCreate, session: Session = Depends(get_session)) -> Factory:
+def create_factory(
+    payload: FactoryCreate, session: Session = Depends(get_session)
+) -> Factory:
     factory = Factory(**payload.model_dump())
     session.add(factory)
     session.commit()

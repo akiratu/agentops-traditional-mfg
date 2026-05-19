@@ -22,8 +22,24 @@ def test_create_agent(client):
 
 def test_list_agents_for_factory(client):
     factory_id = _create_factory(client)
-    client.post("/agents", json={"factory_id": factory_id, "name": "A1", "purpose": "p1", "runtime_status": "pending"})
-    client.post("/agents", json={"factory_id": factory_id, "name": "A2", "purpose": "p2", "runtime_status": "pending"})
+    client.post(
+        "/agents",
+        json={
+            "factory_id": factory_id,
+            "name": "A1",
+            "purpose": "p1",
+            "runtime_status": "pending",
+        },
+    )
+    client.post(
+        "/agents",
+        json={
+            "factory_id": factory_id,
+            "name": "A2",
+            "purpose": "p2",
+            "runtime_status": "pending",
+        },
+    )
     response = client.get(f"/agents?factory_id={factory_id}")
     assert response.status_code == 200
     assert len(response.json()) == 2

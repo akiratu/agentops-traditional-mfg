@@ -1,6 +1,14 @@
 from fastapi import FastAPI
 
-from agentops_core.api import agent, anomaly_signal, factory, rca_finding, regression_run, skill, sop_source
+from agentops_core.api import (
+    agent,
+    anomaly_signal,
+    factory,
+    rca_finding,
+    regression_run,
+    skill,
+    sop_source,
+)
 from agentops_core.api.routes import router as root_router
 
 app = FastAPI(

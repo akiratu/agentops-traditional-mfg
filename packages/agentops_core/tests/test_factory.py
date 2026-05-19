@@ -29,7 +29,9 @@ def test_list_factories(client):
 
 
 def test_get_factory_by_id(client):
-    created = client.post("/factories", json={"name": "F1", "deployment_type": "on_prem"}).json()
+    created = client.post(
+        "/factories", json={"name": "F1", "deployment_type": "on_prem"}
+    ).json()
     response = client.get(f"/factories/{created['id']}")
     assert response.status_code == 200
     assert response.json()["name"] == "F1"

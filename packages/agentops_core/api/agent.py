@@ -10,7 +10,9 @@ router = APIRouter(prefix="/agents", tags=["agent"])
 
 
 @router.post("", response_model=AgentRead, status_code=status.HTTP_201_CREATED)
-def create_agent(payload: AgentCreate, session: Session = Depends(get_session)) -> Agent:
+def create_agent(
+    payload: AgentCreate, session: Session = Depends(get_session)
+) -> Agent:
     agent = Agent(**payload.model_dump())
     session.add(agent)
     session.commit()

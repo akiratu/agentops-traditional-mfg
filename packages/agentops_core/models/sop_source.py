@@ -23,7 +23,9 @@ class SOPSource(TimestampedModel, table=True):
     factory_id: UUID = Field(foreign_key="factory.id", nullable=False, index=True)
     type: SOPSourceType = Field(nullable=False)
     storage_ref: str = Field(nullable=False)
-    metadata_: dict[str, Any] = Field(default_factory=dict, sa_column=Column("metadata", JSON))
+    metadata_: dict[str, Any] = Field(
+        default_factory=dict, sa_column=Column("metadata", JSON)
+    )
     ingested_at: datetime | None = Field(default=None)
 
 

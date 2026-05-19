@@ -17,7 +17,9 @@ class Factory(TimestampedModel, table=True):
     __tablename__ = "factory"
 
     name: str = Field(index=True, nullable=False)
-    deployment_type: DeploymentType = Field(default=DeploymentType.ON_PREM, nullable=False)
+    deployment_type: DeploymentType = Field(
+        default=DeploymentType.ON_PREM, nullable=False
+    )
     langfuse_endpoint: str | None = Field(default=None)
     langfuse_project_id: str | None = Field(default=None)
     contact_info: dict[str, Any] | None = Field(default=None, sa_column=Column(JSON))

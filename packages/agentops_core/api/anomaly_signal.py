@@ -14,7 +14,9 @@ router = APIRouter(prefix="/anomaly-signals", tags=["anomaly_signal"])
 
 
 @router.post("", response_model=AnomalySignalRead, status_code=status.HTTP_201_CREATED)
-def create_signal(payload: AnomalySignalCreate, session: Session = Depends(get_session)) -> AnomalySignal:
+def create_signal(
+    payload: AnomalySignalCreate, session: Session = Depends(get_session)
+) -> AnomalySignal:
     signal = AnomalySignal(**payload.model_dump())
     session.add(signal)
     session.commit()
@@ -34,7 +36,9 @@ def list_signals(
 
 
 @router.get("/{signal_id}", response_model=AnomalySignalRead)
-def get_signal(signal_id: UUID, session: Session = Depends(get_session)) -> AnomalySignal:
+def get_signal(
+    signal_id: UUID, session: Session = Depends(get_session)
+) -> AnomalySignal:
     signal = session.get(AnomalySignal, signal_id)
     if signal is None:
         raise HTTPException(status_code=404, detail="Anomaly signal not found")

@@ -14,7 +14,9 @@ router = APIRouter(prefix="/regression-runs", tags=["regression_run"])
 
 
 @router.post("", response_model=RegressionRunRead, status_code=status.HTTP_201_CREATED)
-def create_run(payload: RegressionRunCreate, session: Session = Depends(get_session)) -> RegressionRun:
+def create_run(
+    payload: RegressionRunCreate, session: Session = Depends(get_session)
+) -> RegressionRun:
     run = RegressionRun(**payload.model_dump())
     session.add(run)
     session.commit()

@@ -21,8 +21,12 @@ class Skill(TimestampedModel, table=True):
     version: int = Field(nullable=False)
     status: SkillStatus = Field(default=SkillStatus.DRAFT, nullable=False)
     prompt: str = Field(nullable=False)
-    tool_specs: list[dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
-    golden_test_cases: list[dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
+    tool_specs: list[dict[str, Any]] = Field(
+        default_factory=list, sa_column=Column(JSON)
+    )
+    golden_test_cases: list[dict[str, Any]] = Field(
+        default_factory=list, sa_column=Column(JSON)
+    )
     sop_source_set_id: str = Field(nullable=False)
     generated_by_run_id: str | None = Field(default=None)
 

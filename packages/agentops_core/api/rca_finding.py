@@ -15,7 +15,9 @@ router = APIRouter(prefix="/rca-findings", tags=["rca_finding"])
 
 
 @router.post("", response_model=RCAFindingRead, status_code=status.HTTP_201_CREATED)
-def create_finding(payload: RCAFindingCreate, session: Session = Depends(get_session)) -> RCAFinding:
+def create_finding(
+    payload: RCAFindingCreate, session: Session = Depends(get_session)
+) -> RCAFinding:
     finding = RCAFinding(**payload.model_dump())
     session.add(finding)
     session.commit()
@@ -35,7 +37,9 @@ def list_findings(
 
 
 @router.get("/{finding_id}", response_model=RCAFindingRead)
-def get_finding(finding_id: UUID, session: Session = Depends(get_session)) -> RCAFinding:
+def get_finding(
+    finding_id: UUID, session: Session = Depends(get_session)
+) -> RCAFinding:
     finding = session.get(RCAFinding, finding_id)
     if finding is None:
         raise HTTPException(status_code=404, detail="RCA finding not found")

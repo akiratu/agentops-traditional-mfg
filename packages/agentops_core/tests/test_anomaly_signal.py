@@ -1,8 +1,16 @@
 def _create_agent(client):
-    factory_id = client.post("/factories", json={"name": "F1", "deployment_type": "on_prem"}).json()["id"]
-    return client.post("/agents", json={
-        "factory_id": factory_id, "name": "A1", "purpose": "p", "runtime_status": "pending",
-    }).json()["id"]
+    factory_id = client.post(
+        "/factories", json={"name": "F1", "deployment_type": "on_prem"}
+    ).json()["id"]
+    return client.post(
+        "/agents",
+        json={
+            "factory_id": factory_id,
+            "name": "A1",
+            "purpose": "p",
+            "runtime_status": "pending",
+        },
+    ).json()["id"]
 
 
 def test_create_anomaly_signal(client):
@@ -35,8 +43,24 @@ def test_human_flag_signal(client):
 
 def test_list_signals_for_agent(client):
     agent_id = _create_agent(client)
-    client.post("/anomaly-signals", json={"agent_id": agent_id, "source_type": "metric_drift", "related_trace_refs": [], "status": "new"})
-    client.post("/anomaly-signals", json={"agent_id": agent_id, "source_type": "cost_spike", "related_trace_refs": [], "status": "new"})
+    client.post(
+        "/anomaly-signals",
+        json={
+            "agent_id": agent_id,
+            "source_type": "metric_drift",
+            "related_trace_refs": [],
+            "status": "new",
+        },
+    )
+    client.post(
+        "/anomaly-signals",
+        json={
+            "agent_id": agent_id,
+            "source_type": "cost_spike",
+            "related_trace_refs": [],
+            "status": "new",
+        },
+    )
     response = client.get(f"/anomaly-signals?agent_id={agent_id}")
     assert response.status_code == 200
     assert len(response.json()) == 2

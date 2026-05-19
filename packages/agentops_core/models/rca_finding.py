@@ -26,11 +26,15 @@ class RCAFindingStatus(str, Enum):
 class RCAFinding(TimestampedModel, table=True):
     __tablename__ = "rca_finding"
 
-    anomaly_signal_id: UUID = Field(foreign_key="anomaly_signal.id", nullable=False, index=True)
+    anomaly_signal_id: UUID = Field(
+        foreign_key="anomaly_signal.id", nullable=False, index=True
+    )
     root_cause_summary: str = Field(nullable=False)
     evidence: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
     suggested_fix_type: SuggestedFixType = Field(nullable=False)
-    suggested_fix_payload: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    suggested_fix_payload: dict[str, Any] = Field(
+        default_factory=dict, sa_column=Column(JSON)
+    )
     confidence_score: float = Field(default=0.0, nullable=False)
     status: RCAFindingStatus = Field(default=RCAFindingStatus.PROPOSED, nullable=False)
 

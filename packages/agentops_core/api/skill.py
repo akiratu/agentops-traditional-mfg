@@ -10,7 +10,9 @@ router = APIRouter(prefix="/skills", tags=["skill"])
 
 
 @router.post("", response_model=SkillRead, status_code=status.HTTP_201_CREATED)
-def create_skill(payload: SkillCreate, session: Session = Depends(get_session)) -> Skill:
+def create_skill(
+    payload: SkillCreate, session: Session = Depends(get_session)
+) -> Skill:
     skill = Skill(**payload.model_dump())
     session.add(skill)
     session.commit()
