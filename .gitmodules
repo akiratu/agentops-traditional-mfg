@@ -1,0 +1,3 @@
+[submodule "packages/flows2agents"]
+	path = packages/flows2agents
+	url = https://github.com/akiratu/flows2agents.git
