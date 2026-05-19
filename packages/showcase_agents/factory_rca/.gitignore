@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Streamlit / runtime artifacts
+.streamlit/secrets.toml
+.streamlit/credentials.toml
+.cache/
+*.log
+
+# Secrets
+.env
+.env.local
+*.pem
+*.key
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+*.swp

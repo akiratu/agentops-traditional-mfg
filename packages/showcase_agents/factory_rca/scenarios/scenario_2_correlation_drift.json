@@ -1,0 +1,154 @@
+{
+  "id": "scenario_2_correlation_drift",
+  "title": "同批 wafer 在兩台 tester 結果差 3%",
+  "icon": "🔬",
+  "business_summary": "Tester-5 與 Tester-8 對同一批 wafer 量測結果差異 3.2% (Vth 規格)，客戶質疑數據可信度、要求重測整批。",
+  "hourly_revenue_impact": "出貨被卡、付款流程暫停",
+  "incident_message": "事故通報：客戶 QA 反映同一批 wafer (LOT-B17-0512) 在 Tester-5 與 Tester-8 之間 Vth 量測結果差 3.2%，超出允收範圍 (±1%)。客戶要求釐清並暫停整批出貨。今天日期 2026-05-16。",
+  "fixtures": {
+    "query_mes": {
+      "default": {
+        "status": "no_data",
+        "hint": "請指定 metric"
+      },
+      "metric=yield_by_tester|timerange=last_24h": {
+        "summary": "近 24h 各 tester yield (ProductB)",
+        "data": {
+          "Tester-5": "94.3%",
+          "Tester-8": "91.1% (略低)"
+        },
+        "note": "Yield 差異不大，但客戶在意的是規格量測值差異"
+      },
+      "metric=lot_history|timerange=last_24h|filter=LOT-B17-0512": {
+        "summary": "LOT-B17-0512 測試紀錄",
+        "data": "此 lot 部分 wafer 走 Tester-5，部分走 Tester-8，wafer 間應為一致。"
+      }
+    },
+    "query_correlation": {
+      "default": {
+        "status": "no_data",
+        "hint": "請指定 tester_a, tester_b, spec"
+      },
+      "tester_a=Tester-5|tester_b=Tester-8|spec=Vth": {
+        "summary": "Tester-5 vs Tester-8 Vth correlation (近 7 日)",
+        "data": {
+          "Tester-5 平均 Vth": "0.682 V",
+          "Tester-8 平均 Vth": "0.660 V",
+          "差異": "3.2% ⚠️ (允收 ±1%)",
+          "趨勢": "差異從 2026-05-09 起出現並持續放大",
+          "註": "2026-05-09 之前 correlation 在 0.3% 以內 (正常)"
+        }
+      },
+      "tester_a=Tester-5|tester_b=Tester-8|spec=Idsat": {
+        "summary": "Tester-5 vs Tester-8 Idsat correlation",
+        "data": {
+          "差異": "0.4% (在允收內)"
+        },
+        "note": "差異只發生在電壓相關量測，不是全面性偏移 → 暗示量測 timing 相關"
+      }
+    },
+    "query_test_program": {
+      "default": {
+        "status": "no_data"
+      },
+      "tester_id=Tester-5": {
+        "summary": "Tester-5 test program",
+        "data": {
+          "name": "TP-ProductB-v2.7.3",
+          "last_modified": "2026-02-14",
+          "compatible_firmware": "≥ v8.4.0"
+        }
+      },
+      "tester_id=Tester-8": {
+        "summary": "Tester-8 test program",
+        "data": {
+          "name": "TP-ProductB-v2.7.3 (與 Tester-5 同版本)",
+          "last_modified": "2026-02-14",
+          "compatible_firmware": "≥ v8.4.0",
+          "note": "兩台 tester 用同一版 test program"
+        }
+      }
+    },
+    "query_tester_status": {
+      "default": {
+        "status": "no_data",
+        "hint": "請指定 tester_id"
+      },
+      "tester_id=Tester-5": {
+        "summary": "Tester-5 狀態",
+        "data": {
+          "model": "Advantest V93000",
+          "firmware": "v8.4.7",
+          "last_firmware_update": "2025-11-20 (半年前)",
+          "last_calibration": "2026-04-30",
+          "self_diagnostic": "Pass"
+        }
+      },
+      "tester_id=Tester-8": {
+        "summary": "Tester-8 狀態",
+        "data": {
+          "model": "Advantest V93000",
+          "firmware": "v8.5.2 ⚠️ (2026-05-09 升版)",
+          "last_firmware_update": "2026-05-09 (一週前)",
+          "last_calibration": "2026-05-09 (韌體升版後校正)",
+          "self_diagnostic": "Pass",
+          "note": "韌體升級時間點與 correlation 異常出現時間點一致"
+        }
+      }
+    },
+    "query_probe_card": {
+      "default": {
+        "summary": "Probe card 狀態",
+        "data": "Tester-5 與 Tester-8 上的 probe card 接觸電阻、壽命皆正常"
+      }
+    },
+    "query_handler_metrics": {
+      "default": {
+        "summary": "Handler 指標",
+        "data": "兩台 tester 的 handler 動作正常"
+      }
+    },
+    "query_facility": {
+      "default": {
+        "summary": "廠務",
+        "data": "B 棟環境正常"
+      }
+    },
+    "query_ot_network": {
+      "default": {
+        "summary": "OT 網路",
+        "data": "SECS/GEM 連線正常，CRC error 在正常範圍"
+      }
+    },
+    "query_wafer_map_status": {
+      "default": {
+        "summary": "Wafer map 上傳",
+        "data": "上傳成功率 100%"
+      }
+    },
+    "query_recent_it_changes": {
+      "default": {
+        "summary": "近 14 日變更紀錄",
+        "data": {
+          "Tester-8 韌體升級": "2026-05-09 由 OT 工程師執行 v8.4.7 → v8.5.2 (release note: 改善 ADC 取樣 timing，提升量測精度)",
+          "Tester-8 calibration": "2026-05-09 韌體升級後執行 (合規)",
+          "Test program": "TP-ProductB-v2.7.3 自 2026-02-14 起無變更",
+          "release_note_key_point": "v8.5.2 release note 第 4.3 節提到『ADC sample window 縮短 8ns，部分舊版 test program 需調整 settling delay』",
+          "IT 端應變": "❌ 此次韌體升級未通知 IT 端，test program 未對應更新 settling delay"
+        },
+        "note": "這是經典的 IT/OT 變更管理斷層"
+      }
+    }
+  },
+  "expected_root_cause_keywords": ["韌體", "firmware", "test program", "ADC", "timing"],
+  "ideal_conclusion": {
+    "business_impact": "Tester-5 與 Tester-8 對同一批 wafer 量測差 3.2%，客戶質疑數據可信度、整批暫停出貨、付款流程被卡，商譽風險升高。",
+    "root_cause": "OT 工程師 5/9 將 Tester-8 韌體升版至 v8.5.2，新韌體縮短了 ADC sample window (8ns)，理論上需同步調整 test program 的 settling delay。但此次升級未通知 IT 端，test program TP-ProductB-v2.7.3 未對應更新，造成量測時序錯位，Vth 出現系統性偏低。",
+    "actions": [
+      "立即將 Tester-8 韌體降版回 v8.4.7，重測 5/9 以後 Tester-8 的所有 LOT-B17 wafer",
+      "中期：調整 test program settling delay 並驗證後，再升回 v8.5.2",
+      "建立韌體與 test program 版本相依表 (compatibility matrix)",
+      "韌體升級流程強制加入 IT 簽核 gate，未簽核不得執行"
+    ]
+  }
+}

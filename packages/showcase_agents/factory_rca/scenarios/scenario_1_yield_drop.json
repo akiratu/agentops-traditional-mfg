@@ -1,0 +1,184 @@
+{
+  "id": "scenario_1_yield_drop",
+  "title": "Yield 從 95% 掉到 78%",
+  "icon": "🎯",
+  "business_summary": "某客戶 product 大量 Bin 5 (open) fail，retest 成本暴增，RMA 風險升高。",
+  "hourly_revenue_impact": "NT$ 1.2M / 小時",
+  "incident_message": "事故通報：產品 ProductA 過去 4 小時 yield 從 95% 掉到 78%，Bin 5 (open) fail 大量增加。客戶已注意到。請查根因並提出建議。今天日期 2026-05-16 下午 3 點。",
+  "fixtures": {
+    "query_mes": {
+      "default": {
+        "status": "no_data",
+        "hint": "請指定 metric 與 timerange"
+      },
+      "metric=bin_distribution|timerange=last_4h|filter=ProductA": {
+        "summary": "過去 4 小時 ProductA bin 分佈",
+        "data": {
+          "Bin 1 (Pass)": "78.0% (-17.0pp vs 過去 7 天均值)",
+          "Bin 5 (Open)": "18.5% (+17.2pp ⚠️ 暴增)",
+          "Bin 7 (Speed)": "2.1%",
+          "Bin 8 (Leakage)": "1.4%"
+        },
+        "note": "Bin 5 暴增是 yield 下降主因"
+      },
+      "metric=yield_by_tester|timerange=last_4h": {
+        "summary": "過去 4 小時各 Tester yield (ProductA)",
+        "data": {
+          "Tester-3": "94.8% (正常)",
+          "Tester-5": "95.2% (正常)",
+          "Tester-7": "62.4% ⚠️ 異常偏低",
+          "Tester-8": "95.1% (正常)"
+        },
+        "note": "問題集中在 Tester-7。同一 lot 在其他 tester 結果正常 → 排除 wafer 本身問題"
+      },
+      "metric=bin5_by_tester|timerange=last_4h": {
+        "summary": "Bin 5 fail 在各 Tester 的分佈",
+        "data": {
+          "Tester-3": "0.8%",
+          "Tester-5": "1.1%",
+          "Tester-7": "37.6% ⚠️",
+          "Tester-8": "0.9%"
+        }
+      },
+      "metric=lot_history|timerange=last_24h|filter=LOT-A22-0514": {
+        "summary": "LOT-A22-0514 在各 tester 的測試紀錄",
+        "data": "此 lot 部分 wafer 走 Tester-7 (yield 61%)，部分走 Tester-3 (yield 95%)。確認 wafer 本身無異常。"
+      }
+    },
+    "query_probe_card": {
+      "default": {
+        "status": "no_data",
+        "hint": "請指定 probe card ID (例如 PC-7-042，或先查 query_tester_status 取得目前裝在 tester 上的卡片 ID)"
+      },
+      "card_id=PC-7-042": {
+        "summary": "Probe card PC-7-042 (Tester-7 目前使用中)",
+        "data": {
+          "model": "FormFactor-MEMS-256",
+          "touchdown_count": "1,820,000 / 2,000,000 (91%)",
+          "installed_date": "2025-11-08",
+          "last_clean": "2026-05-15 22:00",
+          "contact_resistance_avg": "1.42 Ω (基準 0.4 Ω，⚠️ 已 3.5x)",
+          "contact_resistance_trend_48h": [0.62, 0.71, 0.85, 0.98, 1.15, 1.30, 1.42],
+          "note": "接觸電阻持續上升、touchdown 接近壽命門檻 (2M)。pin 磨損會造成假性 open (Bin 5)"
+        }
+      },
+      "card_id=PC-3-018": {
+        "summary": "Probe card PC-3-018 (Tester-3 目前使用中)",
+        "data": {
+          "touchdown_count": "780,000 / 2,000,000 (39%)",
+          "contact_resistance_avg": "0.45 Ω (正常)",
+          "note": "狀態良好，對照組"
+        }
+      }
+    },
+    "query_tester_status": {
+      "default": {
+        "status": "no_data",
+        "hint": "請指定 tester_id (例如 Tester-7)"
+      },
+      "tester_id=Tester-7": {
+        "summary": "Tester-7 狀態",
+        "data": {
+          "model": "Advantest V93000",
+          "status": "Running",
+          "firmware": "v8.4.7 (無近期變更)",
+          "test_program": "TP-ProductA-v3.2.1",
+          "last_calibration": "2026-04-29 (正常週期內)",
+          "probe_card_installed": "PC-7-042",
+          "handler": "Cohu Diamondx (正常)",
+          "self_diagnostic": "Pass",
+          "note": "Tester 本體無異常"
+        }
+      },
+      "tester_id=Tester-3": {
+        "summary": "Tester-3 狀態",
+        "data": {
+          "status": "Running",
+          "probe_card_installed": "PC-3-018",
+          "self_diagnostic": "Pass"
+        }
+      }
+    },
+    "query_handler_metrics": {
+      "default": {
+        "status": "no_data"
+      },
+      "tester_id=Tester-7": {
+        "summary": "Tester-7 handler 動作指標",
+        "data": {
+          "index_time_avg": "1.2s (正常)",
+          "pick_place_time": "0.6s (正常)",
+          "air_pressure": "6.1 bar (正常)",
+          "vacuum": "正常",
+          "note": "Handler 無異常"
+        }
+      }
+    },
+    "query_facility": {
+      "default": {
+        "status": "no_data"
+      },
+      "item=cleanroom_B": {
+        "summary": "B 棟無塵室環境",
+        "data": {
+          "temperature": "22.1°C (正常)",
+          "humidity": "44% (正常)",
+          "particle_count": "正常"
+        }
+      }
+    },
+    "query_ot_network": {
+      "default": {
+        "summary": "OT 網路",
+        "data": "近 24h CRC error 正常範圍，SECS/GEM 連線穩定"
+      }
+    },
+    "query_test_program": {
+      "default": {
+        "status": "no_data"
+      },
+      "tester_id=Tester-7": {
+        "summary": "Tester-7 test program",
+        "data": {
+          "name": "TP-ProductA-v3.2.1",
+          "last_modified": "2026-03-12 (兩個月前)",
+          "note": "近期無變更"
+        }
+      }
+    },
+    "query_correlation": {
+      "default": {
+        "summary": "Tester correlation",
+        "data": "近 7 日各 tester 對 ProductA 規格的 correlation 在允收範圍內 (僅 yield 數量差異，非規格漂移)"
+      }
+    },
+    "query_wafer_map_status": {
+      "default": {
+        "summary": "Wafer map 上傳狀態",
+        "data": "近 24h 上傳成功率 99.8% (正常)"
+      }
+    },
+    "query_recent_it_changes": {
+      "default": {
+        "summary": "近 14 日 IT 端變更紀錄",
+        "data": {
+          "MES 升版": "2026-05-02 (12 天前，與此事故無關)",
+          "保養門檻設定": "Probe card touchdown 警示門檻設於 2,000,000，無近期變更",
+          "test program": "TP-ProductA 自 v3.2.1 (2026-03-12) 起無更新",
+          "note": "保養門檻 2M 為廠商建議上限，但業界實務常在 1.5M 即更換"
+        }
+      }
+    }
+  },
+  "expected_root_cause_keywords": ["probe card", "壽命", "touchdown", "接觸電阻"],
+  "ideal_conclusion": {
+    "business_impact": "ProductA yield 4 小時內從 95% 掉到 78%，retest 與報廢成本暴增、客戶 RMA 風險升高，每小時影響營收約 NT$ 1.2M。",
+    "root_cause": "Tester-7 上的 probe card (PC-7-042) 接近壽命末期 (touchdown 1.82M / 上限 2M)，pin 接觸電阻已從 0.4Ω 上升至 1.42Ω。電阻過高造成 Bin 5 假性 open，誤判好品為不良。",
+    "actions": [
+      "立即停止 Tester-7 並更換 probe card",
+      "過去 4 小時 Tester-7 上判定為 Bin 5 的晶片全部 retest",
+      "Probe card 保養門檻從 2M 下修為 1.5M",
+      "建立接觸電阻 SPC 警報，當 7 日均值 >1.0Ω 自動提醒"
+    ]
+  }
+}

@@ -1,0 +1,14 @@
+[theme]
+# Enterprise-style modern palette: indigo primary + slate neutral
+primaryColor = "#4f46e5"
+backgroundColor = "#fafafa"
+secondaryBackgroundColor = "#ffffff"
+textColor = "#0f172a"
+font = "sans serif"
+
+[browser]
+gatherUsageStats = false
+
+[server]
+headless = true
+runOnSave = true
