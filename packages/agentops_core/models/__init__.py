@@ -5,6 +5,12 @@ from agentops_core.models.factory import (
     FactoryCreate,
     FactoryRead,
 )
+from agentops_core.models.agent import (
+    Agent,
+    AgentCreate,
+    AgentRead,
+    RuntimeStatus,
+)
 
 __all__ = [
     "TimestampedModel",
@@ -12,4 +18,8 @@ __all__ = [
     "Factory",
     "FactoryCreate",
     "FactoryRead",
+    "Agent",
+    "AgentCreate",
+    "AgentRead",
+    "RuntimeStatus",
 ]
