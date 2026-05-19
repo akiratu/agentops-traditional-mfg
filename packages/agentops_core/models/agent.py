@@ -1,6 +1,5 @@
 from datetime import datetime
-from enum import Enum
-from typing import Any
+from enum import StrEnum
 from uuid import UUID
 
 from sqlmodel import Field, SQLModel
@@ -8,7 +7,7 @@ from sqlmodel import Field, SQLModel
 from agentops_core.models.base import TimestampedModel
 
 
-class RuntimeStatus(str, Enum):
+class RuntimeStatus(StrEnum):
     PENDING = "pending"
     DEPLOYING = "deploying"
     RUNNING = "running"
@@ -42,5 +41,5 @@ class AgentRead(SQLModel):
     current_skill_id: UUID | None
     runtime_status: RuntimeStatus
     deployed_at: datetime | None
-    created_at: Any
-    updated_at: Any
+    created_at: datetime
+    updated_at: datetime

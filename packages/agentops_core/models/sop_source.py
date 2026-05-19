@@ -1,5 +1,5 @@
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID
 
@@ -9,7 +9,7 @@ from sqlmodel import Field, SQLModel
 from agentops_core.models.base import TimestampedModel
 
 
-class SOPSourceType(str, Enum):
+class SOPSourceType(StrEnum):
     PDF = "pdf"
     TRANSCRIPT = "transcript"
     TABLE = "table"
@@ -43,8 +43,8 @@ class SOPSourceRead(SQLModel):
     storage_ref: str
     metadata: dict[str, Any]
     ingested_at: datetime | None
-    created_at: Any
-    updated_at: Any
+    created_at: datetime
+    updated_at: datetime
 
     @classmethod
     def model_validate_sop(cls, sop: SOPSource) -> "SOPSourceRead":

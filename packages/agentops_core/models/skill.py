@@ -1,4 +1,5 @@
-from enum import Enum
+from datetime import datetime
+from enum import StrEnum
 from typing import Any
 from uuid import UUID
 
@@ -8,7 +9,7 @@ from sqlmodel import Field, SQLModel
 from agentops_core.models.base import TimestampedModel
 
 
-class SkillStatus(str, Enum):
+class SkillStatus(StrEnum):
     DRAFT = "draft"
     ACTIVE = "active"
     ARCHIVED = "archived"
@@ -52,5 +53,5 @@ class SkillRead(SQLModel):
     golden_test_cases: list[dict[str, Any]]
     sop_source_set_id: str
     generated_by_run_id: str | None
-    created_at: Any
-    updated_at: Any
+    created_at: datetime
+    updated_at: datetime

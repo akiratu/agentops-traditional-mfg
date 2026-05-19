@@ -1,4 +1,5 @@
-from enum import Enum
+from datetime import datetime
+from enum import StrEnum
 from typing import Any
 from uuid import UUID
 
@@ -8,13 +9,13 @@ from sqlmodel import Field, SQLModel
 from agentops_core.models.base import TimestampedModel
 
 
-class TestSetStrategy(str, Enum):
+class TestSetStrategy(StrEnum):
     REPLAY_RECENT = "replay_recent"
     GOLDEN = "golden"
     MIXED = "mixed"
 
 
-class RegressionVerdict(str, Enum):
+class RegressionVerdict(StrEnum):
     PASS = "pass"
     FAIL = "fail"
     NEEDS_REVIEW = "needs_review"
@@ -63,5 +64,5 @@ class RegressionRunRead(SQLModel):
     per_case_results: list[dict[str, Any]]
     regression_findings: list[str]
     verdict: RegressionVerdict
-    created_at: Any
-    updated_at: Any
+    created_at: datetime
+    updated_at: datetime

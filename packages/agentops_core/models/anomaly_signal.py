@@ -1,5 +1,5 @@
-from enum import Enum
-from typing import Any
+from datetime import datetime
+from enum import StrEnum
 from uuid import UUID
 
 from sqlalchemy import JSON, Column
@@ -8,14 +8,14 @@ from sqlmodel import Field, SQLModel
 from agentops_core.models.base import TimestampedModel
 
 
-class AnomalySourceType(str, Enum):
+class AnomalySourceType(StrEnum):
     METRIC_DRIFT = "metric_drift"
     COST_SPIKE = "cost_spike"
     HUMAN_FLAG = "human_flag"
     SCHEDULED = "scheduled"
 
 
-class AnomalyStatus(str, Enum):
+class AnomalyStatus(StrEnum):
     NEW = "new"
     ANALYZING = "analyzing"
     RESOLVED = "resolved"
@@ -44,5 +44,5 @@ class AnomalySignalRead(SQLModel):
     source_type: AnomalySourceType
     related_trace_refs: list[str]
     status: AnomalyStatus
-    created_at: Any
-    updated_at: Any
+    created_at: datetime
+    updated_at: datetime

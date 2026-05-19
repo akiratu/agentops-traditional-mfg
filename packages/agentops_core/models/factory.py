@@ -1,4 +1,5 @@
-from enum import Enum
+from datetime import datetime
+from enum import StrEnum
 from typing import Any
 from uuid import UUID
 
@@ -8,7 +9,7 @@ from sqlmodel import Field, SQLModel
 from agentops_core.models.base import TimestampedModel
 
 
-class DeploymentType(str, Enum):
+class DeploymentType(StrEnum):
     ON_PREM = "on_prem"
     PRIVATE_CLOUD = "private_cloud"
 
@@ -43,5 +44,5 @@ class FactoryRead(SQLModel):
     langfuse_project_id: str | None
     contact_info: dict[str, Any] | None
     kpi_targets: dict[str, Any] | None
-    created_at: Any
-    updated_at: Any
+    created_at: datetime
+    updated_at: datetime

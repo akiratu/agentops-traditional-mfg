@@ -1,4 +1,5 @@
-from enum import Enum
+from datetime import datetime
+from enum import StrEnum
 from typing import Any
 from uuid import UUID
 
@@ -8,7 +9,7 @@ from sqlmodel import Field, SQLModel
 from agentops_core.models.base import TimestampedModel
 
 
-class SuggestedFixType(str, Enum):
+class SuggestedFixType(StrEnum):
     PROMPT_CHANGE = "prompt_change"
     ADD_SKILL = "add_skill"
     SUPPLEMENT_SOP = "supplement_sop"
@@ -16,7 +17,7 @@ class SuggestedFixType(str, Enum):
     RETRAINING = "retraining"
 
 
-class RCAFindingStatus(str, Enum):
+class RCAFindingStatus(StrEnum):
     PROPOSED = "proposed"
     ACCEPTED = "accepted"
     REJECTED = "rejected"
@@ -58,8 +59,8 @@ class RCAFindingRead(SQLModel):
     suggested_fix_payload: dict[str, Any]
     confidence_score: float
     status: RCAFindingStatus
-    created_at: Any
-    updated_at: Any
+    created_at: datetime
+    updated_at: datetime
 
 
 class RCAFindingStatusUpdate(SQLModel):
