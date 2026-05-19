@@ -17,6 +17,12 @@ from agentops_core.models.sop_source import (
     SOPSourceRead,
     SOPSourceType,
 )
+from agentops_core.models.skill import (
+    Skill,
+    SkillCreate,
+    SkillRead,
+    SkillStatus,
+)
 
 __all__ = [
     "TimestampedModel",
@@ -32,4 +38,8 @@ __all__ = [
     "SOPSourceCreate",
     "SOPSourceRead",
     "SOPSourceType",
+    "Skill",
+    "SkillCreate",
+    "SkillRead",
+    "SkillStatus",
 ]

@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from agentops_core.api import agent, factory, sop_source
+from agentops_core.api import agent, factory, skill, sop_source
 from agentops_core.api.routes import router as root_router
 
 app = FastAPI(
@@ -11,3 +11,4 @@ app.include_router(root_router)
 app.include_router(factory.router)
 app.include_router(agent.router)
 app.include_router(sop_source.router)
+app.include_router(skill.router)

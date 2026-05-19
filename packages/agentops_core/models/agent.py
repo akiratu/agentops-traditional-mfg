@@ -3,8 +3,6 @@ from enum import Enum
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import Column
-from sqlalchemy import Uuid as SA_UUID
 from sqlmodel import Field, SQLModel
 
 from agentops_core.models.base import TimestampedModel
@@ -24,13 +22,7 @@ class Agent(TimestampedModel, table=True):
     factory_id: UUID = Field(foreign_key="factory.id", nullable=False, index=True)
     name: str = Field(nullable=False)
     purpose: str = Field(nullable=False)
-    # FK to skill.id is deferred — skill table is created in Task 11.
-    # The column is declared without an FK constraint here; the Alembic migration
-    # in Task 11 will add the FK constraint on the live database.
-    current_skill_id: UUID | None = Field(
-        default=None,
-        sa_column=Column(SA_UUID(as_uuid=True), nullable=True),
-    )
+    current_skill_id: UUID | None = Field(default=None, foreign_key="skill.id")
     runtime_status: RuntimeStatus = Field(default=RuntimeStatus.PENDING, nullable=False)
     deployed_at: datetime | None = Field(default=None)
 

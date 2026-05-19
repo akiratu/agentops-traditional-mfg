@@ -11,6 +11,7 @@ try:
     from agentops_core.models import factory  # noqa: F401
     from agentops_core.models import agent  # noqa: F401
     from agentops_core.models import sop_source  # noqa: F401
+    from agentops_core.models import skill  # noqa: F401
 except ImportError:
     pass
 
