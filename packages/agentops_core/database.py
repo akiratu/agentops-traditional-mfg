@@ -51,3 +51,10 @@ def get_provider() -> LLMProvider:
     Test conftest overrides this to inject FakeLLMProvider directly.
     """
     return build_provider(get_settings())
+
+
+from agentops_core.services.langfuse_client import LangfuseTraceClient
+
+
+def get_langfuse_client() -> LangfuseTraceClient:
+    return LangfuseTraceClient.from_settings(get_settings())

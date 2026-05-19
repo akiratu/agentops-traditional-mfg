@@ -12,6 +12,7 @@ from agentops_core.api import (
     skill_generation,
     sop_source,
     sop_upload,
+    trace_analysis,
 )
 from agentops_core.api.routes import router as root_router
 
@@ -31,3 +32,4 @@ app.include_router(self_evolve.router)
 app.include_router(skill_generation.router)
 app.include_router(sop_upload.router)
 app.include_router(portfolio_generation.router)
+app.include_router(trace_analysis.router)

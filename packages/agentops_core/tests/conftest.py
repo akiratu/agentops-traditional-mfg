@@ -24,9 +24,17 @@ def session():
 
 @pytest.fixture
 def client(session, tmp_path):
+    from unittest.mock import MagicMock
+
     from flows2agents.llm.fake import FakeLLMProvider
 
-    from agentops_core.database import get_provider, get_storage
+    from agentops_core.database import (
+        get_langfuse_client,
+        get_provider,
+        get_session,
+        get_storage,
+    )
+    from agentops_core.services.langfuse_client import LangfuseTraceClient
     from agentops_core.services.storage import LocalStorage
 
     def _override_session():
@@ -42,8 +50,24 @@ def client(session, tmp_path):
     def _override_provider():
         return fake_provider
 
+    fake_lf = MagicMock(spec=LangfuseTraceClient)
+    fake_lf.is_available.return_value = False
+    fake_lf.search_traces.return_value = []
+    fake_lf.fetch_trace.return_value = {
+        "id": "trace_test",
+        "name": "test",
+        "input": None,
+        "output": None,
+        "observations": [],
+        "metadata": {},
+    }
+
+    def _override_langfuse():
+        return fake_lf
+
     app.dependency_overrides[get_session] = _override_session
     app.dependency_overrides[get_storage] = _override_storage
     app.dependency_overrides[get_provider] = _override_provider
+    app.dependency_overrides[get_langfuse_client] = _override_langfuse
     yield TestClient(app)
     app.dependency_overrides.clear()
