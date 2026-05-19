@@ -1,4 +1,5 @@
 """Filesystem storage for SOP uploads and generated skill outputs."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass

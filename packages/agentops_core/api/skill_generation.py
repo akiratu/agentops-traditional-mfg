@@ -1,4 +1,5 @@
 """POST /skill-generations — orchestrates flows2agents single-skill generation."""
+
 from __future__ import annotations
 
 from uuid import UUID
@@ -38,10 +39,14 @@ def create_skill_generation(
         raise HTTPException(status_code=404, detail="Agent not found")
 
     if not payload.sop_source_ids:
-        raise HTTPException(status_code=400, detail="At least one sop_source_id required")
+        raise HTTPException(
+            status_code=400, detail="At least one sop_source_id required"
+        )
 
     sops = list(
-        session.exec(select(SOPSource).where(SOPSource.id.in_(payload.sop_source_ids))).all()
+        session.exec(
+            select(SOPSource).where(SOPSource.id.in_(payload.sop_source_ids))
+        ).all()
     )
     if len(sops) != len(payload.sop_source_ids):
         raise HTTPException(status_code=404, detail="One or more SOP sources not found")

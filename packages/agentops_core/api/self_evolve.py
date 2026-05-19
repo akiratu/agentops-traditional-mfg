@@ -1,4 +1,5 @@
 """POST /self-evolutions — flows2agents Self-Evolve + Skill v_next + RegressionRun."""
+
 from __future__ import annotations
 
 from uuid import UUID
@@ -46,7 +47,9 @@ def create_self_evolution(
         raise HTTPException(status_code=404, detail="Skill not found")
 
     if not payload.failure_cases:
-        raise HTTPException(status_code=400, detail="At least one failure case required")
+        raise HTTPException(
+            status_code=400, detail="At least one failure case required"
+        )
 
     new_ir, evolution_report, regression_report, new_run_id = self_evolve_skill(
         skill=old_skill,
@@ -78,14 +81,18 @@ def create_self_evolution(
 
     # Tally regression results
     pass_count = sum(1 for r in regression_report.results if r.verdict == "resolved")
-    fail_count = sum(1 for r in regression_report.results if r.verdict == "still_broken")
+    fail_count = sum(
+        1 for r in regression_report.results if r.verdict == "still_broken"
+    )
     review_count = sum(1 for r in regression_report.results if r.verdict == "partial")
     overall_verdict = (
         RegressionVerdict.PASS
         if fail_count == 0 and review_count == 0
-        else RegressionVerdict.NEEDS_REVIEW
-        if fail_count == 0
-        else RegressionVerdict.FAIL
+        else (
+            RegressionVerdict.NEEDS_REVIEW
+            if fail_count == 0
+            else RegressionVerdict.FAIL
+        )
     )
 
     run = RegressionRun(

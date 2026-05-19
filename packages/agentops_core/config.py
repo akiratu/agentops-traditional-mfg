@@ -18,7 +18,9 @@ class Settings(BaseSettings):
         default="anthropic",
         description="LLM provider for flows2agents: anthropic / openai / ollama / fake",
     )
-    anthropic_api_key: str = Field(default="", description="Anthropic API key for Claude")
+    anthropic_api_key: str = Field(
+        default="", description="Anthropic API key for Claude"
+    )
 
 
 @lru_cache

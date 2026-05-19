@@ -1,4 +1,5 @@
 """Map flows2agents.ir.SkillIR to a Skill entity payload (prompt / tool_specs / tests)."""
+
 from __future__ import annotations
 
 from typing import Any

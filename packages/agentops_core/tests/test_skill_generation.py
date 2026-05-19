@@ -31,7 +31,9 @@ def _setup_agent_with_sops(client, file_payloads: list[tuple[str, bytes, str]]):
 
 
 def test_generate_skill_from_one_md(client):
-    md = b"# Yield Drop RCA\n\n## Steps\n\n1. Check Bin 5 spike\n2. Inspect probe card\n"
+    md = (
+        b"# Yield Drop RCA\n\n## Steps\n\n1. Check Bin 5 spike\n2. Inspect probe card\n"
+    )
     _, agent_id, sop_ids = _setup_agent_with_sops(client, [("rca.md", md, "qc_spec")])
 
     response = client.post(

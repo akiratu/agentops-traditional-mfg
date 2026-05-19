@@ -1,8 +1,15 @@
 from collections.abc import Generator
+from pathlib import Path
 
+from flows2agents.llm.base import LLMProvider
+from flows2agents.llm.fake import (
+    FakeLLMProvider,
+)  # noqa: F401 — imported for type hints
 from sqlmodel import Session, SQLModel, create_engine
 
 from agentops_core.config import get_settings
+from agentops_core.services.llm_provider import build_provider
+from agentops_core.services.storage import LocalStorage
 
 
 def _make_engine():
@@ -27,11 +34,6 @@ def get_session() -> Generator[Session, None, None]:
         yield session
 
 
-from pathlib import Path
-
-from agentops_core.services.storage import LocalStorage
-
-
 def _make_storage() -> LocalStorage:
     return LocalStorage(root=Path("data"))
 
@@ -41,12 +43,6 @@ storage = _make_storage()
 
 def get_storage() -> LocalStorage:
     return storage
-
-
-from flows2agents.llm.base import LLMProvider
-from flows2agents.llm.fake import FakeLLMProvider  # noqa: F401 — imported for type hints
-
-from agentops_core.services.llm_provider import build_provider
 
 
 def get_provider() -> LLMProvider:

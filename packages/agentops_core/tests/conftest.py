@@ -26,7 +26,7 @@ def session():
 def client(session, tmp_path):
     from flows2agents.llm.fake import FakeLLMProvider
 
-    from agentops_core.database import get_provider, get_session, get_storage
+    from agentops_core.database import get_provider, get_storage
     from agentops_core.services.storage import LocalStorage
 
     def _override_session():

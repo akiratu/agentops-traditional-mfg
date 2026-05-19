@@ -4,18 +4,20 @@ This module is intentionally thin — it does NOT add domain logic.
 It only adapts our DB rows (Agent, SOPSource) to flows2agents inputs,
 calls the library, and returns the SkillIR for downstream mapping.
 """
+
 from __future__ import annotations
 
 import shutil
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Sequence
 from uuid import uuid4
 
 from flows2agents.evolve.models import EvolutionReport, FailureCase, RegressionReport
 from flows2agents.evolve.pipeline import evolve_skill as f2a_evolve_skill
 from flows2agents.ir import RawSource, SkillIR
 from flows2agents.llm.base import LLMProvider
-from flows2agents.pipeline import PipelineInputs, PipelineResult, run as f2a_run
+from flows2agents.pipeline import PipelineInputs, PipelineResult
+from flows2agents.pipeline import run as f2a_run
 from flows2agents.portfolio.builder import BuildOptions
 from flows2agents.portfolio.builder import build_portfolio as f2a_build_portfolio
 from flows2agents.portfolio.decomposer import decompose as f2a_decompose
@@ -113,7 +115,9 @@ def generate_portfolio(
     # Build RawSource list: one description from factory_description, plus one
     # "doc" RawSource per SOP file.
     raw_sources: list[RawSource] = [
-        RawSource(kind="description", name="factory-description", text=factory_description),
+        RawSource(
+            kind="description", name="factory-description", text=factory_description
+        ),
     ]
     for sop in sop_sources:
         doc_path = storage.resolve(sop.storage_ref)
@@ -191,4 +195,9 @@ def self_evolve_skill(
         run_regression_after=True,
     )
     new_skill_dir_relative = str(result.new_skill_dir.relative_to(storage.root))
-    return result.new_ir, result.report, result.regression_report, new_skill_dir_relative
+    return (
+        result.new_ir,
+        result.report,
+        result.regression_report,
+        new_skill_dir_relative,
+    )

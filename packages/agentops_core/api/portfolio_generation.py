@@ -1,4 +1,5 @@
 """POST /portfolio-generations — flows2agents portfolio mode + DB persistence."""
+
 from __future__ import annotations
 
 from typing import Any

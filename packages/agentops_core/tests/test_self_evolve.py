@@ -17,7 +17,9 @@ def _setup_skill(client):
             "runtime_status": "pending",
         },
     ).json()["id"]
-    md = b"# Yield Drop RCA\n\n## Steps\n\n1. Check Bin 5 spike\n2. Inspect probe card\n"
+    md = (
+        b"# Yield Drop RCA\n\n## Steps\n\n1. Check Bin 5 spike\n2. Inspect probe card\n"
+    )
     sop_id = client.post(
         f"/factories/{factory_id}/sop-uploads",
         files={"file": ("rca.md", io.BytesIO(md), "text/markdown")},

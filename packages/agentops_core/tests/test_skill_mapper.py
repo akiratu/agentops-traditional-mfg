@@ -22,7 +22,10 @@ def _make_ir() -> SkillIR:
             ),
         ],
         examples=[
-            Example(query="Yield 從 95% 掉到 78%", response_outline="Check Bin 5 spike → tester #7 → probe card 接觸電阻"),
+            Example(
+                query="Yield 從 95% 掉到 78%",
+                response_outline="Check Bin 5 spike → tester #7 → probe card 接觸電阻",
+            ),
         ],
         resources=[Resource(filename="probe_card_lifespan.md", content="...")],
         provenance=Provenance(from_description=True),

@@ -1,5 +1,3 @@
-import pytest
-
 from agentops_core.config import Settings
 from agentops_core.services.llm_provider import build_provider
 

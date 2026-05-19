@@ -1,4 +1,5 @@
 """Tests for POST /portfolio-generations."""
+
 from __future__ import annotations
 
 import io

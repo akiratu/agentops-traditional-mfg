@@ -12,7 +12,9 @@ def test_upload_pdf_creates_sop_source(client, tmp_path: Path):
     file_content = b"%PDF-1.4 fake pdf bytes"
     response = client.post(
         f"/factories/{factory_id}/sop-uploads",
-        files={"file": ("refund-flow.pdf", io.BytesIO(file_content), "application/pdf")},
+        files={
+            "file": ("refund-flow.pdf", io.BytesIO(file_content), "application/pdf")
+        },
         data={"type": "pdf"},
     )
     assert response.status_code == 201, response.text
@@ -29,7 +31,7 @@ def test_upload_pdf_creates_sop_source(client, tmp_path: Path):
 
 def test_upload_transcript_txt(client):
     factory_id = _create_factory(client)
-    content = "老師傅訪談記錄: probe card 壽命約 200 萬次\n".encode("utf-8")
+    content = "老師傅訪談記錄: probe card 壽命約 200 萬次\n".encode()
     response = client.post(
         f"/factories/{factory_id}/sop-uploads",
         files={"file": ("master-interview.txt", io.BytesIO(content), "text/plain")},
