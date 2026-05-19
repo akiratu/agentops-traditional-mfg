@@ -18,5 +18,46 @@ services:
       timeout: 5s
       retries: 10
 
+  langfuse-db:
+    image: postgres:16-alpine
+    container_name: agentops-langfuse-db
+    environment:
+      POSTGRES_USER: langfuse
+      POSTGRES_PASSWORD: langfuse_dev
+      POSTGRES_DB: langfuse
+    ports:
+      - "5433:5432"
+    volumes:
+      - agentops_langfuse_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "langfuse"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  langfuse:
+    image: langfuse/langfuse:2
+    container_name: agentops-langfuse
+    depends_on:
+      langfuse-db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://langfuse:langfuse_dev@langfuse-db:5432/langfuse
+      NEXTAUTH_SECRET: dev_nextauth_secret_change_me
+      SALT: dev_salt_change_me
+      ENCRYPTION_KEY: 019b37ec3e754929d1eab047b47bc96b66dff24bf5e8ba277653c70774bd83e3
+      NEXTAUTH_URL: http://localhost:3000
+      TELEMETRY_ENABLED: "false"
+      LANGFUSE_INIT_ORG_ID: agentops
+      LANGFUSE_INIT_ORG_NAME: AgentOps
+      LANGFUSE_INIT_PROJECT_ID: factory-rca
+      LANGFUSE_INIT_PROJECT_NAME: Factory RCA
+      LANGFUSE_INIT_USER_EMAIL: dev@agentops.local
+      LANGFUSE_INIT_USER_NAME: Dev
+      LANGFUSE_INIT_USER_PASSWORD: dev_password
+    ports:
+      - "3000:3000"
+
 volumes:
   agentops_pg_data:
+  agentops_langfuse_db_data:
