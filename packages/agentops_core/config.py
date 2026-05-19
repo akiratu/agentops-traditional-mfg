@@ -29,6 +29,18 @@ class Settings(BaseSettings):
         default="gemini-2.5-flash",
         description="Gemini model name. Try 'gemini-2.5-pro' for stronger tool-calling.",
     )
+    trace_analyzer_model: str = Field(
+        default="gemini-2.5-pro",
+        description="Model name for Trace Analyzer (uses configured LLM provider's base_url)",
+    )
+    trace_analyzer_max_steps: int = Field(
+        default=12,
+        description="Hard cap on Trace Analyzer ReAct loop iterations to bound cost",
+    )
+    trace_analyzer_top_k_findings: int = Field(
+        default=3,
+        description="How many past RCAFindings to retrieve as context for the analyzer",
+    )
 
 
 @lru_cache
