@@ -23,10 +23,19 @@ def session():
 
 
 @pytest.fixture
-def client(session):
-    def _override():
+def client(session, tmp_path):
+    from agentops_core.database import get_session, get_storage
+    from agentops_core.services.storage import LocalStorage
+
+    def _override_session():
         yield session
 
-    app.dependency_overrides[get_session] = _override
+    test_storage = LocalStorage(root=tmp_path)
+
+    def _override_storage():
+        return test_storage
+
+    app.dependency_overrides[get_session] = _override_session
+    app.dependency_overrides[get_storage] = _override_storage
     yield TestClient(app)
     app.dependency_overrides.clear()
