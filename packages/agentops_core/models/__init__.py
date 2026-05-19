@@ -30,6 +30,14 @@ from agentops_core.models.anomaly_signal import (
     AnomalySourceType,
     AnomalyStatus,
 )
+from agentops_core.models.rca_finding import (
+    RCAFinding,
+    RCAFindingCreate,
+    RCAFindingRead,
+    RCAFindingStatus,
+    RCAFindingStatusUpdate,
+    SuggestedFixType,
+)
 
 __all__ = [
     "TimestampedModel",
@@ -54,4 +62,10 @@ __all__ = [
     "AnomalySignalRead",
     "AnomalySourceType",
     "AnomalyStatus",
+    "RCAFinding",
+    "RCAFindingCreate",
+    "RCAFindingRead",
+    "RCAFindingStatus",
+    "RCAFindingStatusUpdate",
+    "SuggestedFixType",
 ]

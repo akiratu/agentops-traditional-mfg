@@ -13,6 +13,7 @@ try:
     from agentops_core.models import sop_source  # noqa: F401
     from agentops_core.models import skill  # noqa: F401
     from agentops_core.models import anomaly_signal  # noqa: F401
+    from agentops_core.models import rca_finding  # noqa: F401
 except ImportError:
     pass
 
