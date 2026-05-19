@@ -141,3 +141,22 @@ def test_run_trace_analyzer_dispatches_tools():
     search_traces_mock.assert_called_once()
     assert len(out.failure_cases) == 1
     assert out.total_iterations == 2
+
+
+def test_build_initial_notebook_includes_signal_and_skill():
+    from agentops_core.services.trace_analyzer.notebook import build_initial_notebook
+
+    nb = build_initial_notebook(
+        anomaly_summary="diagnostic accuracy dropped 20%",
+        agent_purpose="Yield drop RCA",
+        skill_version=3,
+        related_trace_count=5,
+    )
+    assert "diagnostic accuracy" in nb
+    assert "Yield drop RCA" in nb
+    assert "v3" in nb or "version 3" in nb
+    # 4 required sections
+    assert "🔍" in nb
+    assert "💡" in nb
+    assert "❓" in nb
+    assert "🚫" in nb
