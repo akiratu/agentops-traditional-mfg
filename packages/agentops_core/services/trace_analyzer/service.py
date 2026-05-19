@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+from datetime import datetime
 from typing import Any
 from uuid import UUID
 
@@ -25,6 +26,7 @@ from agentops_core.services.trace_analyzer.db_tools import (
     fetch_skill_detail_tool,
     fetch_skill_versions_tool,
 )
+from agentops_core.services.trace_analyzer.notebook import build_initial_notebook
 from agentops_core.services.trace_analyzer.output import build_rca_finding_payload
 from agentops_core.services.trace_analyzer.tools import (
     fetch_trace_detail_tool,
@@ -100,7 +102,10 @@ def analyze_anomaly_signal(
     # Wire the tool registry. Each tool gets the right dependencies bound.
     tool_registry = {
         "search_traces": lambda agent_id, limit=20, since_iso=None: search_traces_tool(
-            langfuse_client, agent_id=agent_id, limit=limit
+            langfuse_client,
+            agent_id=agent_id,
+            limit=limit,
+            since=datetime.fromisoformat(since_iso) if since_iso else None,
         ),
         "fetch_trace_detail": lambda trace_id: fetch_trace_detail_tool(
             langfuse_client, trace_id=trace_id
@@ -111,10 +116,17 @@ def analyze_anomaly_signal(
         "fetch_skill_versions": lambda agent_id: fetch_skill_versions_tool(
             session, agent_id=UUID(agent_id)
         ),
-        "fetch_past_findings": lambda agent_id, k=3: fetch_past_findings_tool(
+        "fetch_past_findings": lambda agent_id, k=settings.trace_analyzer_top_k_findings: fetch_past_findings_tool(
             session, agent_id=UUID(agent_id), k=k
         ),
     }
+
+    initial_notebook = build_initial_notebook(
+        anomaly_summary=f"source_type={signal.source_type.value if hasattr(signal.source_type, 'value') else signal.source_type}, status={signal.status.value if hasattr(signal.status, 'value') else signal.status}, traces={len(signal.related_trace_refs or [])}",
+        agent_purpose=agent.purpose,
+        skill_version=skill.version,
+        related_trace_count=len(signal.related_trace_refs or []),
+    )
 
     client = _make_openai_client(settings)
     model = _resolve_model(settings)
@@ -125,6 +137,7 @@ def analyze_anomaly_signal(
         model=model,
         tool_registry=tool_registry,
         max_steps=settings.trace_analyzer_max_steps,
+        initial_notebook=initial_notebook,
     )
 
     payload = build_rca_finding_payload(output, anomaly_signal_id=signal.id)

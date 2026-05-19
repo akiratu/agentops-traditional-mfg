@@ -156,6 +156,7 @@ def run_trace_analyzer(
     model: str,
     tool_registry: dict[str, Callable[..., Any]],
     max_steps: int = 12,
+    initial_notebook: str | None = None,
 ) -> TraceAnalyzerOutput:
     """Run the agent loop.
 
@@ -175,7 +176,7 @@ def run_trace_analyzer(
 
     plan: list[str] = []
     plan_steps_done: set[int] = set()
-    notebook: str = _TERMINAL_NOTEBOOK_PLACEHOLDER
+    notebook: str = initial_notebook or _TERMINAL_NOTEBOOK_PLACEHOLDER
     failure_cases: list[FailureCase] = []
     terminated_by_submit = False
     iteration = 0
