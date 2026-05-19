@@ -38,6 +38,13 @@ from agentops_core.models.rca_finding import (
     RCAFindingStatusUpdate,
     SuggestedFixType,
 )
+from agentops_core.models.regression_run import (
+    RegressionRun,
+    RegressionRunCreate,
+    RegressionRunRead,
+    RegressionVerdict,
+    TestSetStrategy,
+)
 
 __all__ = [
     "TimestampedModel",
@@ -68,4 +75,9 @@ __all__ = [
     "RCAFindingStatus",
     "RCAFindingStatusUpdate",
     "SuggestedFixType",
+    "RegressionRun",
+    "RegressionRunCreate",
+    "RegressionRunRead",
+    "RegressionVerdict",
+    "TestSetStrategy",
 ]
