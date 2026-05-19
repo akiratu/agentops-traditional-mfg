@@ -8,6 +8,7 @@ from sqlmodel import SQLModel
 # (Will be added incrementally; safe to import-fail individual modules now.)
 try:
     from agentops_core.models import base  # noqa: F401
+    from agentops_core.models import factory  # noqa: F401
 except ImportError:
     pass
 
