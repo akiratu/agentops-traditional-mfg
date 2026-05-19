@@ -23,6 +23,13 @@ from agentops_core.models.skill import (
     SkillRead,
     SkillStatus,
 )
+from agentops_core.models.anomaly_signal import (
+    AnomalySignal,
+    AnomalySignalCreate,
+    AnomalySignalRead,
+    AnomalySourceType,
+    AnomalyStatus,
+)
 
 __all__ = [
     "TimestampedModel",
@@ -42,4 +49,9 @@ __all__ = [
     "SkillCreate",
     "SkillRead",
     "SkillStatus",
+    "AnomalySignal",
+    "AnomalySignalCreate",
+    "AnomalySignalRead",
+    "AnomalySourceType",
+    "AnomalyStatus",
 ]
