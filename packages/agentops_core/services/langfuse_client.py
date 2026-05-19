@@ -4,6 +4,7 @@ We isolate the SDK behind a stable surface so:
 - Tests can inject a MagicMock instead of hitting a real Langfuse
 - Upgrading Langfuse (e.g. v2 → v3 SDK changes) only requires touching this file
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -21,7 +22,7 @@ class LangfuseTraceClient:
     sdk_client: Any = field(default=None)  # langfuse.Langfuse instance or test mock
 
     @classmethod
-    def from_settings(cls, settings: Settings) -> "LangfuseTraceClient":
+    def from_settings(cls, settings: Settings) -> LangfuseTraceClient:
         sdk = None
         if settings.langfuse_public_key and settings.langfuse_secret_key:
             try:
@@ -42,7 +43,11 @@ class LangfuseTraceClient:
         )
 
     def is_available(self) -> bool:
-        return self.sdk_client is not None and bool(self.public_key) and bool(self.secret_key)
+        return (
+            self.sdk_client is not None
+            and bool(self.public_key)
+            and bool(self.secret_key)
+        )
 
     def fetch_trace(self, trace_id: str) -> dict[str, Any]:
         """Return a normalized trace dict.
@@ -66,7 +71,9 @@ class LangfuseTraceClient:
             "name": getattr(d, "name", None),
             "input": getattr(d, "input", None),
             "output": getattr(d, "output", None),
-            "observations": [self._obs_to_dict(o) for o in getattr(d, "observations", []) or []],
+            "observations": [
+                self._obs_to_dict(o) for o in getattr(d, "observations", []) or []
+            ],
             "metadata": getattr(d, "metadata", {}) or {},
         }
 
@@ -91,7 +98,9 @@ class LangfuseTraceClient:
         kwargs: dict[str, Any] = {"limit": limit}
         if agent_id:
             # We tag traces with metadata.agent_id when emitting from our runtime.
-            kwargs["user_id"] = agent_id  # langfuse v2: user_id is the conventional bucket
+            kwargs["user_id"] = (
+                agent_id  # langfuse v2: user_id is the conventional bucket
+            )
         if since:
             kwargs["from_timestamp"] = since
         if until:
@@ -101,9 +110,11 @@ class LangfuseTraceClient:
             {
                 "id": t.id,
                 "name": getattr(t, "name", None),
-                "timestamp": getattr(t, "timestamp", None).isoformat()
-                if getattr(t, "timestamp", None)
-                else None,
+                "timestamp": (
+                    getattr(t, "timestamp", None).isoformat()
+                    if getattr(t, "timestamp", None)
+                    else None
+                ),
                 "metadata": getattr(t, "metadata", {}) or {},
             }
             for t in (resp.data or [])

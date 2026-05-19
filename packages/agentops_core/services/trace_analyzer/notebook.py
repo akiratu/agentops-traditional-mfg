@@ -4,6 +4,7 @@ Builds the initial 4-section notebook from known facts so the agent doesn't
 waste tool calls re-deriving them. The agent will then `update_notebook` as
 it learns more.
 """
+
 from __future__ import annotations
 
 

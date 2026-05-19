@@ -1,7 +1,7 @@
 from uuid import uuid4
 
-from agentops_core.schemas import FailureCase
 from agentops_core.models.rca_finding import RCAFindingStatus, SuggestedFixType
+from agentops_core.schemas import FailureCase
 from agentops_core.services.trace_analyzer.agent import TraceAnalyzerOutput
 from agentops_core.services.trace_analyzer.output import (
     build_rca_finding_payload,

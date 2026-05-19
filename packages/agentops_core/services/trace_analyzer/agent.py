@@ -14,13 +14,15 @@ The agent state machine is:
 - For 'submit_plan' / 'mark_plan_step_done' / 'update_notebook': handled inline
   by the agent (no registry dispatch needed — they're state-mutation operations)
 """
+
 from __future__ import annotations
 
 import json
 import logging
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 from uuid import UUID
 
 from agentops_core.schemas import FailureCase
@@ -82,7 +84,12 @@ SUBMIT_FAILURE_CASES_SCHEMA: dict[str, Any] = {
                             "actual_outcome": {"type": "string"},
                             "context": {"type": ["string", "null"]},
                         },
-                        "required": ["id", "query", "expected_outcome", "actual_outcome"],
+                        "required": [
+                            "id",
+                            "query",
+                            "expected_outcome",
+                            "actual_outcome",
+                        ],
                     },
                 },
             },
@@ -182,7 +189,9 @@ def run_trace_analyzer(
                 tool_choice="auto",
             )
         except Exception as exc:
-            log.warning("Trace Analyzer LLM call failed at iteration %d: %s", iteration, exc)
+            log.warning(
+                "Trace Analyzer LLM call failed at iteration %d: %s", iteration, exc
+            )
             break
 
         assistant_msg = resp.choices[0].message
@@ -209,7 +218,10 @@ def run_trace_analyzer(
 
         if not tool_calls:
             # Model returned content with no tool calls — break to avoid infinite loop
-            log.info("Trace Analyzer: model returned no tool calls at iter %d, terminating", iteration)
+            log.info(
+                "Trace Analyzer: model returned no tool calls at iter %d, terminating",
+                iteration,
+            )
             break
 
         for tc in tool_calls:

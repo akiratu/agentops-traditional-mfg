@@ -31,7 +31,6 @@ def client(session, tmp_path):
     from agentops_core.database import (
         get_langfuse_client,
         get_provider,
-        get_session,
         get_storage,
     )
     from agentops_core.services.langfuse_client import LangfuseTraceClient

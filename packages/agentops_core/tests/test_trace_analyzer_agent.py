@@ -2,9 +2,6 @@ import json
 from unittest.mock import MagicMock
 from uuid import uuid4
 
-import pytest
-
-from agentops_core.schemas import FailureCase
 from agentops_core.services.trace_analyzer.agent import (
     TraceAnalyzerInput,
     run_trace_analyzer,
@@ -76,7 +73,9 @@ def test_run_trace_analyzer_terminates_when_submit_failure_cases_called():
 def test_run_trace_analyzer_returns_no_evidence_when_max_steps_exceeded():
     fake_openai = MagicMock()
     # Always return an empty assistant message (no tool calls, no content)
-    fake_openai.chat.completions.create.return_value = _FakeOpenAIResp(content=None, tool_calls=[])
+    fake_openai.chat.completions.create.return_value = _FakeOpenAIResp(
+        content=None, tool_calls=[]
+    )
 
     inp = TraceAnalyzerInput(
         anomaly_signal_id=uuid4(),

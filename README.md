@@ -76,6 +76,17 @@ The Self-Evolve endpoint defines the contract that Plan 3's Trace Analyzer
 will populate: it consumes `FailureCase` objects (id, query, expected_outcome,
 actual_outcome, context).
 
+### Trace Analyzer (Plan 3)
+
+- `POST /trace-analyses` — { anomaly_signal_id } → { rca_finding, failure_cases }
+  - Runs a ReAct-style diagnostic loop against the agent's Langfuse traces
+  - Tools: search_traces, fetch_trace_detail, fetch_skill_detail,
+    fetch_skill_versions, fetch_past_findings
+  - Outputs an `RCAFinding` (saved to DB, status=proposed) and a list of
+    `FailureCase` objects ready for `POST /self-evolutions`
+  - Requires LLM provider with multi-tool calling: OpenAI / Gemini (Pro
+    recommended) / Ollama. Anthropic NOT supported in v0.1.
+
 ## Project structure
 
 ```
@@ -97,7 +108,7 @@ agentops-traditional-mfg/
 |---|---|---|
 | Plan 1 | W1-2 Foundation | ✅ Done |
 | Plan 2 | W3-4 flows2agents service wrapper | ✅ Done |
-| Plan 3 | W5-6 Trace Analyzer + Langfuse | TBD |
+| Plan 3 | W5-6 Trace Analyzer + Langfuse | ✅ Done |
 | Plan 4 | W7-8 Anomaly Detector | TBD |
 | Plan 5 | W9-11 Developer UI (Next.js) | TBD |
 | Plan 6 | W12-13 Factory UI + Dogfood | TBD |

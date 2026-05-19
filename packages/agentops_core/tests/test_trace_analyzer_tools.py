@@ -1,12 +1,32 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from unittest.mock import MagicMock
+from uuid import uuid4
 
-import pytest
+from sqlmodel import Session
 
+from agentops_core.models.agent import Agent, RuntimeStatus
+from agentops_core.models.anomaly_signal import (
+    AnomalySignal,
+    AnomalySourceType,
+    AnomalyStatus,
+)
+from agentops_core.models.factory import Factory
+from agentops_core.models.rca_finding import (
+    RCAFinding,
+    RCAFindingStatus,
+    SuggestedFixType,
+)
+from agentops_core.models.skill import Skill, SkillStatus
+from agentops_core.services.trace_analyzer.db_tools import (
+    DB_TOOL_SCHEMAS,
+    fetch_past_findings_tool,
+    fetch_skill_detail_tool,
+    fetch_skill_versions_tool,
+)
 from agentops_core.services.trace_analyzer.tools import (
     LANGFUSE_TOOL_SCHEMAS,
-    search_traces_tool,
     fetch_trace_detail_tool,
+    search_traces_tool,
 )
 
 
@@ -22,7 +42,13 @@ def _fake_client():
         "input": {"q": "yield drop tester 7"},
         "output": {"root_cause": "(LLM unavailable)"},
         "observations": [
-            {"id": "obs1", "type": "LLM", "name": "Gemini", "input": "prompt", "output": "response"},
+            {
+                "id": "obs1",
+                "type": "LLM",
+                "name": "Gemini",
+                "input": "prompt",
+                "output": "response",
+            },
         ],
         "metadata": {"agent_id": "a-1"},
     }
@@ -58,36 +84,13 @@ def test_langfuse_tool_schemas_have_required_fields():
 
 def test_search_traces_tool_respects_since():
     client = _fake_client()
-    since = datetime.now(tz=timezone.utc) - timedelta(days=3)
+    since = datetime.now(tz=UTC) - timedelta(days=3)
     search_traces_tool(client, agent_id="a-1", since=since, limit=5)
     # Verify we passed `since` through to the client
     call = client.search_traces.call_args
-    assert call.kwargs.get("since") == since or (len(call.args) > 1 and call.args[1] == since)
-
-
-from uuid import uuid4
-
-from sqlmodel import Session
-
-from agentops_core.models.agent import Agent, RuntimeStatus
-from agentops_core.models.factory import Factory
-from agentops_core.models.rca_finding import (
-    RCAFinding,
-    RCAFindingStatus,
-    SuggestedFixType,
-)
-from agentops_core.models.skill import Skill, SkillStatus
-from agentops_core.models.anomaly_signal import (
-    AnomalySignal,
-    AnomalySourceType,
-    AnomalyStatus,
-)
-from agentops_core.services.trace_analyzer.db_tools import (
-    DB_TOOL_SCHEMAS,
-    fetch_past_findings_tool,
-    fetch_skill_detail_tool,
-    fetch_skill_versions_tool,
-)
+    assert call.kwargs.get("since") == since or (
+        len(call.args) > 1 and call.args[1] == since
+    )
 
 
 def _seed_skill(session: Session) -> tuple[Skill, Agent]:
@@ -95,7 +98,9 @@ def _seed_skill(session: Session) -> tuple[Skill, Agent]:
     session.add(f)
     session.commit()
     session.refresh(f)
-    a = Agent(factory_id=f.id, name="A1", purpose="test", runtime_status=RuntimeStatus.PENDING)
+    a = Agent(
+        factory_id=f.id, name="A1", purpose="test", runtime_status=RuntimeStatus.PENDING
+    )
     session.add(a)
     session.commit()
     session.refresh(a)

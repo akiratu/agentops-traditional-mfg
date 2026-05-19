@@ -2,12 +2,10 @@ from collections.abc import Generator
 from pathlib import Path
 
 from flows2agents.llm.base import LLMProvider
-from flows2agents.llm.fake import (
-    FakeLLMProvider,
-)  # noqa: F401 — imported for type hints
 from sqlmodel import Session, SQLModel, create_engine
 
 from agentops_core.config import get_settings
+from agentops_core.services.langfuse_client import LangfuseTraceClient
 from agentops_core.services.llm_provider import build_provider
 from agentops_core.services.storage import LocalStorage
 
@@ -51,9 +49,6 @@ def get_provider() -> LLMProvider:
     Test conftest overrides this to inject FakeLLMProvider directly.
     """
     return build_provider(get_settings())
-
-
-from agentops_core.services.langfuse_client import LangfuseTraceClient
 
 
 def get_langfuse_client() -> LangfuseTraceClient:

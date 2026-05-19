@@ -1,4 +1,5 @@
 """Translate TraceAnalyzerOutput into an RCAFindingCreate payload."""
+
 from __future__ import annotations
 
 from typing import Any

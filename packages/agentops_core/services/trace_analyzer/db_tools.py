@@ -4,6 +4,7 @@ These read from our application DB to give the analyzer context about
 the agent under investigation: its current skill, version history, and
 similar past findings.
 """
+
 from __future__ import annotations
 
 from typing import Any
@@ -16,7 +17,9 @@ from agentops_core.models.rca_finding import RCAFinding
 from agentops_core.models.skill import Skill
 
 
-def fetch_skill_detail_tool(session: Session, *, skill_id: UUID) -> dict[str, Any] | None:
+def fetch_skill_detail_tool(
+    session: Session, *, skill_id: UUID
+) -> dict[str, Any] | None:
     skill = session.get(Skill, skill_id)
     if skill is None:
         return None
@@ -24,7 +27,9 @@ def fetch_skill_detail_tool(session: Session, *, skill_id: UUID) -> dict[str, An
         "id": str(skill.id),
         "agent_id": str(skill.agent_id),
         "version": skill.version,
-        "status": skill.status.value if hasattr(skill.status, "value") else str(skill.status),
+        "status": (
+            skill.status.value if hasattr(skill.status, "value") else str(skill.status)
+        ),
         "prompt": skill.prompt,
         "tool_specs": skill.tool_specs,
         "golden_test_cases": skill.golden_test_cases,
@@ -33,7 +38,9 @@ def fetch_skill_detail_tool(session: Session, *, skill_id: UUID) -> dict[str, An
     }
 
 
-def fetch_skill_versions_tool(session: Session, *, agent_id: UUID) -> list[dict[str, Any]]:
+def fetch_skill_versions_tool(
+    session: Session, *, agent_id: UUID
+) -> list[dict[str, Any]]:
     skills = list(session.exec(select(Skill).where(Skill.agent_id == agent_id)).all())
     return [
         {

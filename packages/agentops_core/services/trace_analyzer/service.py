@@ -1,4 +1,5 @@
 """Service that orchestrates: anomaly signal → Trace Analyzer agent → RCAFinding row."""
+
 from __future__ import annotations
 
 import os

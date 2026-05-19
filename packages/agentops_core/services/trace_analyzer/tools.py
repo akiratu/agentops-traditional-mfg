@@ -7,6 +7,7 @@ Each tool has:
 Schemas use the openai tool-calling format so the agent loop can pass them
 straight to chat.completions.create(tools=...).
 """
+
 from __future__ import annotations
 
 from datetime import datetime

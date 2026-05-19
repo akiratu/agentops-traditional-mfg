@@ -1,7 +1,5 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from unittest.mock import MagicMock
-
-import pytest
 
 from agentops_core.services.langfuse_client import LangfuseTraceClient
 
@@ -65,20 +63,23 @@ def test_search_traces_returns_list_of_summaries():
     t1 = MagicMock()
     t1.id = "trace_1"
     t1.name = "rca"
-    t1.timestamp = datetime.now(tz=timezone.utc)
+    t1.timestamp = datetime.now(tz=UTC)
     t1.metadata = {"agent_id": "a1"}
     t2 = MagicMock()
     t2.id = "trace_2"
     t2.name = "rca"
-    t2.timestamp = datetime.now(tz=timezone.utc)
+    t2.timestamp = datetime.now(tz=UTC)
     t2.metadata = {"agent_id": "a1"}
     fake_sdk.fetch_traces.return_value = MagicMock(data=[t1, t2])
     client = LangfuseTraceClient(
-        host="http://localhost:3000", public_key="pk", secret_key="sk", sdk_client=fake_sdk,
+        host="http://localhost:3000",
+        public_key="pk",
+        secret_key="sk",
+        sdk_client=fake_sdk,
     )
     summaries = client.search_traces(
         agent_id="a1",
-        since=datetime.now(tz=timezone.utc) - timedelta(days=7),
+        since=datetime.now(tz=UTC) - timedelta(days=7),
         limit=10,
     )
     assert len(summaries) == 2

@@ -1,4 +1,5 @@
 """POST /trace-analyses — runs Trace Analyzer on an AnomalySignal."""
+
 from __future__ import annotations
 
 from uuid import UUID

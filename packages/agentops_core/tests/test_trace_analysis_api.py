@@ -1,5 +1,8 @@
+import os
 from unittest.mock import patch
 from uuid import UUID, uuid4
+
+import pytest
 
 
 def _setup_agent_with_skill(client):
@@ -113,11 +116,6 @@ def test_trace_analyses_returns_finding_and_failure_cases(client, session):
     assert body["rca_finding"]["status"] == "proposed"
     assert len(body["failure_cases"]) == 1
     assert body["failure_cases"][0]["id"] == "case-mock"
-
-
-import os
-
-import pytest
 
 
 @pytest.mark.skipif(
