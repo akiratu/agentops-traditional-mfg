@@ -41,3 +41,17 @@ storage = _make_storage()
 
 def get_storage() -> LocalStorage:
     return storage
+
+
+from flows2agents.llm.base import LLMProvider
+from flows2agents.llm.fake import FakeLLMProvider  # noqa: F401 — imported for type hints
+
+from agentops_core.services.llm_provider import build_provider
+
+
+def get_provider() -> LLMProvider:
+    """FastAPI dependency: return the configured LLM provider.
+
+    Test conftest overrides this to inject FakeLLMProvider directly.
+    """
+    return build_provider(get_settings())

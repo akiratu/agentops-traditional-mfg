@@ -24,7 +24,9 @@ def session():
 
 @pytest.fixture
 def client(session, tmp_path):
-    from agentops_core.database import get_session, get_storage
+    from flows2agents.llm.fake import FakeLLMProvider
+
+    from agentops_core.database import get_provider, get_session, get_storage
     from agentops_core.services.storage import LocalStorage
 
     def _override_session():
@@ -35,7 +37,13 @@ def client(session, tmp_path):
     def _override_storage():
         return test_storage
 
+    fake_provider = FakeLLMProvider()
+
+    def _override_provider():
+        return fake_provider
+
     app.dependency_overrides[get_session] = _override_session
     app.dependency_overrides[get_storage] = _override_storage
+    app.dependency_overrides[get_provider] = _override_provider
     yield TestClient(app)
     app.dependency_overrides.clear()
