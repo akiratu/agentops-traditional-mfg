@@ -24,7 +24,12 @@ class SkillGenerationRequest(BaseModel):
     agent_id: UUID
     sop_source_ids: list[UUID]
     sop_source_set_id: str | None = None
-    strategy: str = "single"
+    # "mining" extracts workflows + knowledge separately and gives every
+    # procedure step a traces_to[] linking back to source knowledge IDs —
+    # required for the "可解釋性" pitch in manufacturing/government settings.
+    # flows2agents falls back to "single" automatically if mining stages fail,
+    # and to deterministic if even single fails. Override per-request if needed.
+    strategy: str = "mining"
 
 
 @router.post("", response_model=SkillRead, status_code=status.HTTP_201_CREATED)
