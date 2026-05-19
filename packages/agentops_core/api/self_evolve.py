@@ -110,7 +110,10 @@ def create_self_evolution(
     session.commit()
     session.refresh(run)
 
+    # Use from_attributes=True so Pydantic reads fields off the SQLModel row
+    # directly instead of via .model_dump() (which can return {} when the
+    # session state isn't fully attribute-loaded after refresh).
     return SelfEvolveResponse(
-        skill=SkillRead.model_validate(new_skill.model_dump()),
-        regression_run=RegressionRunRead.model_validate(run.model_dump()),
+        skill=SkillRead.model_validate(new_skill, from_attributes=True),
+        regression_run=RegressionRunRead.model_validate(run, from_attributes=True),
     )
