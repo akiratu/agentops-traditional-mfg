@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Env / secrets
+.env
+.env.local
+*.local
+
+# Postgres data (docker volumes use named volumes but just in case)
+data/
+postgres_data/
+langfuse_data/
+
+# Alembic
+# (keep alembic/versions/ in git)
+
+# Build artifacts
+*.log
