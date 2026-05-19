@@ -81,4 +81,10 @@ def downgrade() -> None:
     op.drop_table('regression_run')
     op.drop_index(op.f('ix_anomaly_signal_agent_id'), table_name='anomaly_signal')
     op.drop_table('anomaly_signal')
+    op.execute("DROP TYPE IF EXISTS anomalysourcetype")
+    op.execute("DROP TYPE IF EXISTS anomalystatus")
+    op.execute("DROP TYPE IF EXISTS rcafindingstatus")
+    op.execute("DROP TYPE IF EXISTS suggestedfixtype")
+    op.execute("DROP TYPE IF EXISTS testsetstrategy")
+    op.execute("DROP TYPE IF EXISTS regressionverdict")
     # ### end Alembic commands ###

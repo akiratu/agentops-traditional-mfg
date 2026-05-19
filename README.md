@@ -79,12 +79,10 @@ agentops-traditional-mfg/
 
 ## Known tech debt (to address in Plan 2 or earlier)
 
-1. **Migration downgrade doesn't drop Postgres enum types.** Running `alembic downgrade base && alembic upgrade head` fails because enum types (`deploymenttype`, `runtimestatus`, `skillstatus`, etc.) persist as orphans after table drops. Fix: each migration's `downgrade()` should add `op.execute("DROP TYPE IF EXISTS <name>")` after dropping tables. Not blocking for v0.1 because the workflow doesn't require downgrade.
+1. **`updated_at` not auto-refreshed on row update.** `TimestampedModel.updated_at` uses `default_factory=_utcnow` which runs only at creation time. Needs a SQLAlchemy `onupdate` hook or `before_flush` event listener. Will matter when Plan 2 adds PATCH endpoints to mutate rows.
 
-2. **`updated_at` not auto-refreshed on row update.** `TimestampedModel.updated_at` uses `default_factory=_utcnow` which runs only at creation time. Needs a SQLAlchemy `onupdate` hook or `before_flush` event listener. Will matter when Plan 2 adds PATCH endpoints to mutate rows.
+2. **Missing PATCH endpoints for Agent.runtime_status and Skill.status.** Workflow operations like "promote skill v2 to active" or "transition agent to running" have no API today. RCAFinding has a status PATCH endpoint as the only example. Will be needed in Plan 2.
 
-3. **Missing PATCH endpoints for Agent.runtime_status and Skill.status.** Workflow operations like "promote skill v2 to active" or "transition agent to running" have no API today. RCAFinding has a status PATCH endpoint as the only example. Will be needed in Plan 2.
+3. **`docker-compose.yml` has obsolete `version:` key.** Docker Compose v2 warns but still works. Remove the line when convenient.
 
-4. **`docker-compose.yml` has obsolete `version:` key.** Docker Compose v2 warns but still works. Remove the line when convenient.
-
-5. **`AnomalySourceType` adds `COST_SPIKE` beyond spec.** Reasonable extension (it's in the North Star scenario) but worth flagging.
+4. **`AnomalySourceType` adds `COST_SPIKE` beyond spec.** Reasonable extension (it's in the North Star scenario) but worth flagging.

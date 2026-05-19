@@ -81,3 +81,6 @@ def downgrade() -> None:
     op.drop_table('skill')
     op.drop_index(op.f('ix_agent_factory_id'), table_name='agent')
     op.drop_table('agent')
+    op.execute("DROP TYPE IF EXISTS runtimestatus")
+    op.execute("DROP TYPE IF EXISTS sopsourcetype")
+    op.execute("DROP TYPE IF EXISTS skillstatus")
