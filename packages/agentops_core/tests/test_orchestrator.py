@@ -161,16 +161,102 @@ def test_run_self_evolve_for_finding_calls_service(session):
     session.refresh(finding)
 
     with patch(
-        "agentops_core.services.anomaly_detector.orchestrator.self_evolve_skill"
-    ) as mock_evolve:
-        mock_evolve.return_value = (
-            MagicMock(),
-            MagicMock(additive_violations=[]),
-            MagicMock(total=1, results=[], notes=""),
-            "skills/x/y",
-        )
+        "agentops_core.services.anomaly_detector.orchestrator.persist_self_evolution"
+    ) as mock_persist:
+        mock_persist.return_value = (MagicMock(id=uuid4()), MagicMock(id=uuid4()))
         run_self_evolve_for_finding(
             finding_id=finding.id,
             session_factory=lambda: session,
         )
-    mock_evolve.assert_called_once()
+    mock_persist.assert_called_once()
+
+
+def test_run_self_evolve_for_finding_persists_skill_and_regression_run(session):
+    """v0.3 fix: orchestrator must actually write Skill + RegressionRun rows."""
+    from sqlmodel import select
+
+    from agentops_core.models.rca_finding import (
+        RCAFinding,
+        RCAFindingStatus,
+        SuggestedFixType,
+    )
+    from agentops_core.models.regression_run import RegressionRun
+
+    agent, skill_v1 = _seed_agent_with_skill(session)
+    signal = AnomalySignal(
+        agent_id=agent.id,
+        source_type=AnomalySourceType.METRIC_DRIFT,
+        related_trace_refs=[],
+        status=AnomalyStatus.ANALYZING,
+    )
+    session.add(signal)
+    session.commit()
+    session.refresh(signal)
+    finding = RCAFinding(
+        anomaly_signal_id=signal.id,
+        root_cause_summary="x",
+        evidence={},
+        suggested_fix_type=SuggestedFixType.SUPPLEMENT_SOP,
+        suggested_fix_payload={
+            "failure_cases": [
+                {
+                    "id": "case-1",
+                    "query": "q",
+                    "expected_outcome": "e",
+                    "actual_outcome": "a",
+                    "context": None,
+                }
+            ]
+        },
+        confidence_score=0.85,
+        status=RCAFindingStatus.ACCEPTED,
+    )
+    session.add(finding)
+    session.commit()
+    session.refresh(finding)
+
+    # Mock the flows2agents call (the LLM-driving function) but NOT persistence.
+    # The orchestrator should still produce a Skill row + RegressionRun row.
+    fake_ir = MagicMock()
+    fake_ir.model_dump.return_value = {}
+    with (
+        patch(
+            "agentops_core.services.self_evolve_persistence.self_evolve_skill"
+        ) as mock_evolve,
+        patch(
+            "agentops_core.services.self_evolve_persistence.skill_ir_to_skill_payload"
+        ) as mock_mapper,
+    ):
+        mock_evolve.return_value = (
+            fake_ir,
+            MagicMock(additive_violations=[]),
+            MagicMock(total=1, results=[], notes=""),
+            "skills/f2a-evolve-fake/cnc",
+        )
+        mock_mapper.return_value = {
+            "prompt": "v2 prompt",
+            "tool_specs": [],
+            "golden_test_cases": [],
+        }
+        run_self_evolve_for_finding(
+            finding_id=finding.id,
+            session_factory=lambda: session,
+        )
+
+    # Verify persistence
+    all_skills = list(
+        session.exec(select(Skill).where(Skill.agent_id == agent.id)).all()
+    )
+    assert len(all_skills) == 2, "should have v1 + new v2 skill"
+    new_skill = next(s for s in all_skills if s.id != skill_v1.id)
+    assert new_skill.version == 2
+    assert new_skill.status == SkillStatus.DRAFT
+    assert new_skill.generated_by_run_id == "skills/f2a-evolve-fake/cnc"
+
+    runs = list(
+        session.exec(
+            select(RegressionRun).where(RegressionRun.skill_id_new == new_skill.id)
+        ).all()
+    )
+    assert len(runs) == 1
+    assert runs[0].skill_id_old == skill_v1.id

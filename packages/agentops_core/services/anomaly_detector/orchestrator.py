@@ -38,8 +38,8 @@ from agentops_core.services.anomaly_detector.cost_spike import (
 from agentops_core.services.anomaly_detector.metric_drift import (
     detect_metric_drift_for_agent,
 )
-from agentops_core.services.flows2agents_service import self_evolve_skill
 from agentops_core.services.langfuse_client import LangfuseTraceClient
+from agentops_core.services.self_evolve_persistence import persist_self_evolution
 from agentops_core.services.trace_analyzer.service import analyze_anomaly_signal
 
 log = logging.getLogger(__name__)
@@ -178,9 +178,10 @@ def run_self_evolve_for_finding(
     provider = build_provider(settings)
 
     try:
-        new_ir, evolution_report, regression_report, new_run_id = self_evolve_skill(
-            skill=skill,
-            failures=failure_cases,
+        new_skill, regression_run = persist_self_evolution(
+            old_skill=skill,
+            failure_cases=failure_cases,
+            session=session,
             storage=storage,
             provider=provider,
         )
@@ -189,8 +190,10 @@ def run_self_evolve_for_finding(
         return
 
     log.info(
-        "Self-Evolve produced new skill run %s for finding %s (regression: %s)",
-        new_run_id,
+        "Self-Evolve produced skill v%d (%s) + regression %s (verdict=%s) for finding %s",
+        new_skill.version,
+        new_skill.id,
+        regression_run.id,
+        regression_run.verdict,
         finding_id,
-        regression_report.notes,
     )
