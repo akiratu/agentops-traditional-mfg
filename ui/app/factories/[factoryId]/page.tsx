@@ -10,7 +10,7 @@ import { BreadcrumbNav } from '@/components/layout/breadcrumb-nav'
 import { DataState } from '@/components/layout/data-state'
 import { api } from '@/lib/api'
 import { qk } from '@/lib/query-keys'
-import { relativeTime } from '@/lib/format'
+import { relativeTime, shortId } from '@/lib/format'
 
 export default function FactoryDetailPage({
   params,
@@ -32,7 +32,7 @@ export default function FactoryDetailPage({
       <BreadcrumbNav
         crumbs={[
           { href: '/factories', label: 'Factories' },
-          { label: factoryQ.data?.name ?? factoryId.slice(0, 8) },
+          { label: factoryQ.data?.name ?? shortId(factoryId) },
         ]}
       />
       <DataState query={factoryQ}>
@@ -44,7 +44,7 @@ export default function FactoryDetailPage({
                 <Badge variant="outline">{f.deployment_type}</Badge>
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-card pt-0 text-xs text-zinc-500">
+            <CardContent className="p-card pt-0 text-xs text-muted-foreground">
               <div>Langfuse: {f.langfuse_endpoint ?? '—'}</div>
               <div>Project: {f.langfuse_project_id ?? '—'}</div>
               <div>Updated: {relativeTime(f.updated_at)}</div>
@@ -74,16 +74,16 @@ export default function FactoryDetailPage({
                       {a.name}
                     </Link>
                   </TableCell>
-                  <TableCell className="text-xs text-zinc-500">{a.purpose}</TableCell>
+                  <TableCell className="text-xs text-muted-foreground">{a.purpose}</TableCell>
                   <TableCell>
                     <Badge variant="outline" className="text-[11px]">
                       {a.runtime_status}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-xs text-zinc-500">
+                  <TableCell className="text-xs text-muted-foreground">
                     {a.current_skill_id ? a.current_skill_id.slice(0, 8) : '—'}
                   </TableCell>
-                  <TableCell className="text-xs text-zinc-500">
+                  <TableCell className="text-xs text-muted-foreground">
                     {relativeTime(a.updated_at)}
                   </TableCell>
                 </TableRow>

@@ -25,7 +25,7 @@ export default function FactoriesPage() {
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             {factories.map((f) => (
               <Link key={f.id} href={`/factories/${f.id}`} className="block">
-                <Card className="hover:border-zinc-400 dark:hover:border-zinc-600">
+                <Card className="hover:border-foreground/30">
                   <CardHeader className="p-card pb-2">
                     <CardTitle className="flex items-center justify-between text-base">
                       {f.name}
@@ -34,8 +34,8 @@ export default function FactoriesPage() {
                       </Badge>
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="p-card pt-0 text-xs text-zinc-500">
-                    {f.kpi_targets
+                  <CardContent className="p-card pt-0 text-xs text-muted-foreground">
+                    {f.kpi_targets && Object.keys(f.kpi_targets).length > 0
                       ? `${Object.keys(f.kpi_targets).length} KPI targets`
                       : 'No KPI targets'}
                   </CardContent>
