@@ -19,6 +19,9 @@ from agentops_core.api import (
     trace_analysis,
 )
 from agentops_core.api.routes import router as root_router
+from agentops_core.services.anomaly_detector.orchestrator import (
+    run_anomaly_check_all_agents,
+)
 from agentops_core.services.scheduler import (
     build_scheduler,
     start_scheduler,
@@ -26,25 +29,17 @@ from agentops_core.services.scheduler import (
 )
 
 
-# Placeholder runners — Tasks 8 + 9 + 11 replace these with real detector calls.
-def _noop_metric_drift() -> None:
-    return None
-
-
-def _noop_cost_spike() -> None:
-    return None
-
-
 _scheduler = None
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    """Start the anomaly-detector scheduler on app startup, stop on shutdown."""
     global _scheduler
     _scheduler = build_scheduler(
-        metric_drift_runner=_noop_metric_drift,
-        cost_spike_runner=_noop_cost_spike,
+        metric_drift_runner=run_anomaly_check_all_agents,
+        cost_spike_runner=lambda: None,  # cost_spike runs inside same iteration
+        metric_interval_seconds=3600,
+        cost_interval_seconds=86400,  # placeholder slot, not used
     )
     start_scheduler(_scheduler)
     try:

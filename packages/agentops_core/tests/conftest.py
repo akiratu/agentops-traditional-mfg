@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session, SQLModel, create_engine
@@ -5,6 +7,19 @@ from sqlmodel.pool import StaticPool
 
 from agentops_core.database import get_session
 from agentops_core.main import app
+
+
+@pytest.fixture(autouse=True)
+def _mock_orchestrator_background_tasks():
+    """Prevent BackgroundTasks from calling orchestrator functions that need
+    real DB/LLM connections during API tests.  The orchestrator itself is
+    tested separately in test_orchestrator.py."""
+    with patch(
+        "agentops_core.api.anomaly_signal.run_trace_analyzer_for_signal"
+    ), patch(
+        "agentops_core.api.human_flag.run_trace_analyzer_for_signal"
+    ):
+        yield
 
 
 @pytest.fixture

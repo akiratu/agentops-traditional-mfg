@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from pydantic import BaseModel
 from sqlmodel import Session
 
@@ -19,6 +19,9 @@ from agentops_core.models.anomaly_signal import (
     AnomalySignalRead,
     AnomalySourceType,
     AnomalyStatus,
+)
+from agentops_core.services.anomaly_detector.orchestrator import (
+    run_trace_analyzer_for_signal,
 )
 
 router = APIRouter(prefix="/human-flags", tags=["human_flag"])
@@ -35,6 +38,7 @@ class HumanFlagRequest(BaseModel):
 )
 def create_human_flag(
     payload: HumanFlagRequest,
+    background_tasks: BackgroundTasks,
     session: Session = Depends(get_session),
 ) -> AnomalySignal:
     agent = session.get(Agent, payload.agent_id)
@@ -50,4 +54,5 @@ def create_human_flag(
     session.add(signal)
     session.commit()
     session.refresh(signal)
+    background_tasks.add_task(run_trace_analyzer_for_signal, signal_id=signal.id)
     return signal

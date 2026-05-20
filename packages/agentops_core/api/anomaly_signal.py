@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from sqlmodel import Session, select
 
 from agentops_core.database import get_session
@@ -9,18 +9,24 @@ from agentops_core.models.anomaly_signal import (
     AnomalySignalCreate,
     AnomalySignalRead,
 )
+from agentops_core.services.anomaly_detector.orchestrator import (
+    run_trace_analyzer_for_signal,
+)
 
 router = APIRouter(prefix="/anomaly-signals", tags=["anomaly_signal"])
 
 
 @router.post("", response_model=AnomalySignalRead, status_code=status.HTTP_201_CREATED)
 def create_signal(
-    payload: AnomalySignalCreate, session: Session = Depends(get_session)
+    payload: AnomalySignalCreate,
+    background_tasks: BackgroundTasks,
+    session: Session = Depends(get_session),
 ) -> AnomalySignal:
     signal = AnomalySignal(**payload.model_dump())
     session.add(signal)
     session.commit()
     session.refresh(signal)
+    background_tasks.add_task(run_trace_analyzer_for_signal, signal_id=signal.id)
     return signal
 
 
