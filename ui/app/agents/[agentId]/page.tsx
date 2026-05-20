@@ -84,7 +84,7 @@ export default function AgentDashboardPage({
                       value={agent.runtime_status}
                       onValueChange={(v) => mutateStatus.mutate(v as RuntimeStatus)}
                     >
-                      <SelectTrigger className="h-7 w-32 text-xs">
+                      <SelectTrigger className="h-7 w-32 text-xs" disabled={mutateStatus.isPending}>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -131,7 +131,7 @@ export default function AgentDashboardPage({
           </DataState>
           <Link
             href="/anomalies"
-            className="mt-2 inline-block text-xs text-blue-600 hover:underline dark:text-blue-400"
+            className="mt-2 inline-block text-xs text-primary underline-offset-4 hover:underline"
           >
             View all anomalies →
           </Link>
@@ -161,7 +161,7 @@ export default function AgentDashboardPage({
           </DataState>
           <Link
             href={`/skills/${agentId}`}
-            className="mt-2 inline-block text-xs text-blue-600 hover:underline dark:text-blue-400"
+            className="mt-2 inline-block text-xs text-primary underline-offset-4 hover:underline"
           >
             View skill timeline + diff →
           </Link>
