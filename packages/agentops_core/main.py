@@ -35,10 +35,8 @@ _scheduler = None
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     global _scheduler
     _scheduler = build_scheduler(
-        metric_drift_runner=run_anomaly_check_all_agents,
-        cost_spike_runner=lambda: None,  # cost_spike runs inside same iteration
-        metric_interval_seconds=3600,
-        cost_interval_seconds=86400,  # placeholder slot, not used
+        anomaly_check_runner=run_anomaly_check_all_agents,
+        interval_seconds=3600,
     )
     start_scheduler(_scheduler)
     try:

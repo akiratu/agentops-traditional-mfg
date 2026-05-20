@@ -22,7 +22,7 @@ from agentops_core.models.anomaly_signal import (
     AnomalySourceType,
     AnomalyStatus,
 )
-from agentops_core.services.anomaly_detector.metric_drift import _has_open_signal
+from agentops_core.services.anomaly_detector._helpers import has_open_signal
 from agentops_core.services.langfuse_client import LangfuseTraceClient
 
 log = logging.getLogger(__name__)
@@ -41,7 +41,7 @@ def detect_cost_spike_for_agent(
     spike_multiplier: float = 1.5,
 ) -> AnomalySignal | None:
     """Detect cost spike for one agent; create signal if spike detected."""
-    if _has_open_signal(session, agent_id=agent.id):
+    if has_open_signal(session, agent_id=agent.id):
         return None
 
     now = datetime.now(tz=UTC)

@@ -15,7 +15,7 @@ import logging
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
-from sqlmodel import Session, select
+from sqlmodel import Session
 
 from agentops_core.models.agent import Agent
 from agentops_core.models.anomaly_signal import (
@@ -23,6 +23,7 @@ from agentops_core.models.anomaly_signal import (
     AnomalySourceType,
     AnomalyStatus,
 )
+from agentops_core.services.anomaly_detector._helpers import has_open_signal
 from agentops_core.services.langfuse_client import LangfuseTraceClient
 
 log = logging.getLogger(__name__)
@@ -40,7 +41,7 @@ def detect_metric_drift_for_agent(
     drop_threshold: float = 0.05,
 ) -> AnomalySignal | None:
     """Inspect this agent's last 14 days of traces; create signal if drift detected."""
-    if _has_open_signal(session, agent_id=agent.id):
+    if has_open_signal(session, agent_id=agent.id):
         log.debug("Skipping %s: open signal exists", agent.id)
         return None
 
@@ -91,17 +92,6 @@ def detect_metric_drift_for_agent(
         signal.id,
     )
     return signal
-
-
-def _has_open_signal(session: Session, *, agent_id: Any) -> bool:
-    open_statuses = (AnomalyStatus.NEW, AnomalyStatus.ANALYZING)
-    rows = session.exec(
-        select(AnomalySignal).where(
-            AnomalySignal.agent_id == agent_id,
-            AnomalySignal.status.in_(open_statuses),
-        )
-    ).all()
-    return len(rows) > 0
 
 
 def _split_by_window(

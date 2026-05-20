@@ -1,8 +1,8 @@
 """APScheduler wrapper for anomaly-detection jobs.
 
 We keep this module thin and dependency-free of the detectors themselves —
-detectors are passed in as callables so tests can substitute mocks and the
-main() module can wire in real ones.
+the runner is passed in as a callable so tests can substitute mocks and the
+main() module can wire in the real `run_anomaly_check_all_agents`.
 """
 
 from __future__ import annotations
@@ -18,28 +18,19 @@ log = logging.getLogger(__name__)
 
 def build_scheduler(
     *,
-    metric_drift_runner: Callable[[], None],
-    cost_spike_runner: Callable[[], None],
-    metric_interval_seconds: int = 3600,
-    cost_interval_seconds: int = 3600,
+    anomaly_check_runner: Callable[[], None],
+    interval_seconds: int = 3600,
 ) -> BackgroundScheduler:
-    """Return an unstarted BackgroundScheduler with both jobs registered."""
+    """Return an unstarted BackgroundScheduler with the anomaly-check job."""
     sched = BackgroundScheduler(
         timezone="UTC",
         job_defaults={"coalesce": True, "max_instances": 1},
     )
     sched.add_job(
-        metric_drift_runner,
+        anomaly_check_runner,
         trigger="interval",
-        seconds=metric_interval_seconds,
-        id="metric_drift",
-        next_run_time=None,
-    )
-    sched.add_job(
-        cost_spike_runner,
-        trigger="interval",
-        seconds=cost_interval_seconds,
-        id="cost_spike",
+        seconds=interval_seconds,
+        id="anomaly_check",
         next_run_time=None,
     )
     return sched
