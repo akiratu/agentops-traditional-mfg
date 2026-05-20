@@ -4,6 +4,7 @@ Creates an AnomalySignal with source_type=human_flag pointing at the
 specified trace. The orchestrator (Plan 4 Task 11) picks up new signals
 and dispatches the Trace Analyzer.
 """
+
 from __future__ import annotations
 
 from uuid import UUID
@@ -33,9 +34,7 @@ class HumanFlagRequest(BaseModel):
     comment: str | None = None
 
 
-@router.post(
-    "", response_model=AnomalySignalRead, status_code=status.HTTP_201_CREATED
-)
+@router.post("", response_model=AnomalySignalRead, status_code=status.HTTP_201_CREATED)
 def create_human_flag(
     payload: HumanFlagRequest,
     background_tasks: BackgroundTasks,

@@ -5,7 +5,9 @@ def _create_agent(client):
     return client.post(
         "/agents",
         json={
-            "factory_id": factory_id, "name": "A1", "purpose": "p",
+            "factory_id": factory_id,
+            "name": "A1",
+            "purpose": "p",
             "runtime_status": "pending",
         },
     ).json()["id"]

@@ -87,6 +87,23 @@ actual_outcome, context).
   - Requires LLM provider with multi-tool calling: OpenAI / Gemini (Pro
     recommended) / Ollama. Anthropic NOT supported in v0.1.
 
+
+### Anomaly Detector & Orchestration (Plan 4)
+
+- `POST /human-flags` — { agent_id, trace_id, comment? } → AnomalySignal(source=human_flag)
+- `PATCH /skills/{id}/status` — promote DRAFT → ACTIVE (auto-archives prior active)
+- `PATCH /agents/{id}/current-skill` — set/clear current_skill_id
+- `PATCH /agents/{id}/runtime-status` — lifecycle transition; sets deployed_at on first RUNNING
+- `PATCH /rca-findings/{id}/status` — set to ACCEPTED to fire Self-Evolve as a background task
+
+The anomaly detector runs in-process via APScheduler:
+- Hourly job iterates RUNNING agents and runs metric_drift + cost_spike detectors
+- metric_drift: compare last 7d mean of `rca_accuracy` score against prior 7d, fire if drop > 5pp
+- cost_spike: last 24h mean cost-per-trace vs prior 7d, fire if > 1.5× baseline
+- Open signals (NEW or ANALYZING) for the same agent dedupe; the detector skips silently
+
+When a signal is created (scheduler / API), a background task runs the Trace Analyzer.
+When an RCAFinding status is patched to ACCEPTED, a background task runs Self-Evolve.
 ## Project structure
 
 ```
@@ -109,17 +126,13 @@ agentops-traditional-mfg/
 | Plan 1 | W1-2 Foundation | ✅ Done |
 | Plan 2 | W3-4 flows2agents service wrapper | ✅ Done |
 | Plan 3 | W5-6 Trace Analyzer + Langfuse | ✅ Done |
-| Plan 4 | W7-8 Anomaly Detector | TBD |
+| Plan 4 | W7-8 Anomaly Detector + Orchestration | ✅ Done |
 | Plan 5 | W9-11 Developer UI (Next.js) | TBD |
 | Plan 6 | W12-13 Factory UI + Dogfood | TBD |
 | Plan 7 | W14 Deployment & Release | TBD |
 
 ## Known tech debt (to address in Plan 2 or earlier)
 
-1. **`updated_at` not auto-refreshed on row update.** `TimestampedModel.updated_at` uses `default_factory=_utcnow` which runs only at creation time. Needs a SQLAlchemy `onupdate` hook or `before_flush` event listener. Will matter when Plan 2 adds PATCH endpoints to mutate rows.
+1. **`docker-compose.yml` has obsolete `version:` key.** Docker Compose v2 warns but still works. Remove the line when convenient.
 
-2. **Missing PATCH endpoints for Agent.runtime_status and Skill.status.** Workflow operations like "promote skill v2 to active" or "transition agent to running" have no API today. RCAFinding has a status PATCH endpoint as the only example. Will be needed in Plan 2.
-
-3. **`docker-compose.yml` has obsolete `version:` key.** Docker Compose v2 warns but still works. Remove the line when convenient.
-
-4. **`AnomalySourceType` adds `COST_SPIKE` beyond spec.** Reasonable extension (it's in the North Star scenario) but worth flagging.
+2. **`AnomalySourceType` adds `COST_SPIKE` beyond spec.** Reasonable extension (it's in the North Star scenario) but worth flagging.

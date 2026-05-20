@@ -1,10 +1,8 @@
 from unittest.mock import patch
-from uuid import UUID
 
 
 def _setup_finding(client, session):
     """Create factory, agent (with current_skill), signal, finding."""
-    from agentops_core.models.agent import Agent
 
     factory_id = client.post(
         "/factories", json={"name": "F1", "deployment_type": "on_prem"}
@@ -12,15 +10,21 @@ def _setup_finding(client, session):
     agent_id = client.post(
         "/agents",
         json={
-            "factory_id": factory_id, "name": "A1", "purpose": "p",
+            "factory_id": factory_id,
+            "name": "A1",
+            "purpose": "p",
             "runtime_status": "pending",
         },
     ).json()["id"]
     skill_id = client.post(
         "/skills",
         json={
-            "agent_id": agent_id, "version": 1, "status": "active",
-            "prompt": "v1", "tool_specs": [], "golden_test_cases": [],
+            "agent_id": agent_id,
+            "version": 1,
+            "status": "active",
+            "prompt": "v1",
+            "tool_specs": [],
+            "golden_test_cases": [],
             "sop_source_set_id": "s1",
         },
     ).json()["id"]
@@ -33,8 +37,10 @@ def _setup_finding(client, session):
     signal_id = client.post(
         "/anomaly-signals",
         json={
-            "agent_id": agent_id, "source_type": "metric_drift",
-            "related_trace_refs": ["t1"], "status": "new",
+            "agent_id": agent_id,
+            "source_type": "metric_drift",
+            "related_trace_refs": ["t1"],
+            "status": "new",
         },
     ).json()["id"]
 

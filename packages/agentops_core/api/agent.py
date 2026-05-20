@@ -1,3 +1,4 @@
+from datetime import UTC
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -82,7 +83,7 @@ def update_agent_runtime_status(
     payload: AgentRuntimeStatusUpdate,
     session: Session = Depends(get_session),
 ) -> Agent:
-    from datetime import datetime, timezone
+    from datetime import datetime
 
     agent = session.get(Agent, agent_id)
     if agent is None:
@@ -91,11 +92,8 @@ def update_agent_runtime_status(
     # First transition to RUNNING stamps deployed_at. Subsequent transitions
     # (stopped, error, deploying-again) leave it as a historical first-deploy
     # marker — operators can read it as "first went live at".
-    if (
-        payload.runtime_status == RuntimeStatus.RUNNING
-        and agent.deployed_at is None
-    ):
-        agent.deployed_at = datetime.now(tz=timezone.utc)
+    if payload.runtime_status == RuntimeStatus.RUNNING and agent.deployed_at is None:
+        agent.deployed_at = datetime.now(tz=UTC)
 
     agent.runtime_status = payload.runtime_status
     session.add(agent)

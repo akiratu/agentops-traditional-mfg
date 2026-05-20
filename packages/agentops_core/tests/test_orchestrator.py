@@ -24,15 +24,21 @@ def _seed_agent_with_skill(session: Session) -> tuple[Agent, Skill]:
     session.commit()
     session.refresh(f)
     a = Agent(
-        factory_id=f.id, name="A1", purpose="p",
+        factory_id=f.id,
+        name="A1",
+        purpose="p",
         runtime_status=RuntimeStatus.RUNNING,
     )
     session.add(a)
     session.commit()
     session.refresh(a)
     s = Skill(
-        agent_id=a.id, version=1, status=SkillStatus.ACTIVE,
-        prompt="v1", tool_specs=[], golden_test_cases=[],
+        agent_id=a.id,
+        version=1,
+        status=SkillStatus.ACTIVE,
+        prompt="v1",
+        tool_specs=[],
+        golden_test_cases=[],
         sop_source_set_id="s1",
     )
     session.add(s)
@@ -50,8 +56,12 @@ def test_run_anomaly_check_iterates_only_running_agents(session):
     session.add(f)
     session.commit()
     session.refresh(f)
-    running = Agent(factory_id=f.id, name="run", purpose="p", runtime_status=RuntimeStatus.RUNNING)
-    stopped = Agent(factory_id=f.id, name="stop", purpose="p", runtime_status=RuntimeStatus.STOPPED)
+    running = Agent(
+        factory_id=f.id, name="run", purpose="p", runtime_status=RuntimeStatus.RUNNING
+    )
+    stopped = Agent(
+        factory_id=f.id, name="stop", purpose="p", runtime_status=RuntimeStatus.STOPPED
+    )
     session.add(running)
     session.add(stopped)
     session.commit()
@@ -59,18 +69,23 @@ def test_run_anomaly_check_iterates_only_running_agents(session):
     session.refresh(stopped)
 
     seen_agent_ids: list = []
+
     def fake_metric_drift(*, agent, session, langfuse_client, **kwargs):
         seen_agent_ids.append(agent.id)
         return None
+
     def fake_cost_spike(*, agent, session, langfuse_client, **kwargs):
         return None
 
-    with patch(
-        "agentops_core.services.anomaly_detector.orchestrator.detect_metric_drift_for_agent",
-        side_effect=fake_metric_drift,
-    ), patch(
-        "agentops_core.services.anomaly_detector.orchestrator.detect_cost_spike_for_agent",
-        side_effect=fake_cost_spike,
+    with (
+        patch(
+            "agentops_core.services.anomaly_detector.orchestrator.detect_metric_drift_for_agent",
+            side_effect=fake_metric_drift,
+        ),
+        patch(
+            "agentops_core.services.anomaly_detector.orchestrator.detect_cost_spike_for_agent",
+            side_effect=fake_cost_spike,
+        ),
     ):
         run_anomaly_check_all_agents(
             session_factory=lambda: session,
@@ -117,8 +132,11 @@ def test_run_self_evolve_for_finding_calls_service(session):
     session.commit()
     session.refresh(signal)
     from agentops_core.models.rca_finding import (
-        RCAFinding, RCAFindingStatus, SuggestedFixType,
+        RCAFinding,
+        RCAFindingStatus,
+        SuggestedFixType,
     )
+
     finding = RCAFinding(
         anomaly_signal_id=signal.id,
         root_cause_summary="x",
@@ -127,8 +145,11 @@ def test_run_self_evolve_for_finding_calls_service(session):
         suggested_fix_payload={
             "failure_cases": [
                 {
-                    "id": "case-1", "query": "q", "expected_outcome": "e",
-                    "actual_outcome": "a", "context": None,
+                    "id": "case-1",
+                    "query": "q",
+                    "expected_outcome": "e",
+                    "actual_outcome": "a",
+                    "context": None,
                 }
             ]
         },

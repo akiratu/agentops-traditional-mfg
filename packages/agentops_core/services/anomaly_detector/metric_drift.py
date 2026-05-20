@@ -8,10 +8,11 @@ source_type=metric_drift.
 Insufficient data (fewer than 3 traces in either window) → no signal.
 Open signals (NEW / ANALYZING) for the same agent → dedupe (no signal).
 """
+
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from sqlmodel import Session, select
@@ -43,7 +44,7 @@ def detect_metric_drift_for_agent(
         log.debug("Skipping %s: open signal exists", agent.id)
         return None
 
-    now = datetime.now(tz=timezone.utc)
+    now = datetime.now(tz=UTC)
     window_a_start = now - timedelta(days=WINDOW_DAYS * 2)
     boundary = now - timedelta(days=WINDOW_DAYS)
 
@@ -58,10 +59,7 @@ def detect_metric_drift_for_agent(
         return None
 
     prior, recent = _split_by_window(traces, boundary)
-    if (
-        len(prior) < MIN_TRACES_PER_WINDOW
-        or len(recent) < MIN_TRACES_PER_WINDOW
-    ):
+    if len(prior) < MIN_TRACES_PER_WINDOW or len(recent) < MIN_TRACES_PER_WINDOW:
         return None
 
     prior_mean = _mean_score(prior)
@@ -86,7 +84,11 @@ def detect_metric_drift_for_agent(
     session.refresh(signal)
     log.info(
         "Metric drift on agent %s: prior=%.2f, recent=%.2f, drop=%.2f → signal %s",
-        agent.id, prior_mean, recent_mean, drop, signal.id,
+        agent.id,
+        prior_mean,
+        recent_mean,
+        drop,
+        signal.id,
     )
     return signal
 
@@ -112,8 +114,8 @@ def _split_by_window(
         ts = _parse_iso(t.get("timestamp"))
         if ts is None:
             continue
-        b = boundary if boundary.tzinfo else boundary.replace(tzinfo=timezone.utc)
-        ts_aware = ts if ts.tzinfo else ts.replace(tzinfo=timezone.utc)
+        b = boundary if boundary.tzinfo else boundary.replace(tzinfo=UTC)
+        ts_aware = ts if ts.tzinfo else ts.replace(tzinfo=UTC)
         (recent if ts_aware >= b else prior).append(t)
     return prior, recent
 
@@ -140,7 +142,7 @@ def _mean_score(traces: list[dict[str, Any]]) -> float | None:
 
 
 def _trace_failed(trace: dict[str, Any]) -> bool:
-    for s in (trace.get("scores") or []):
+    for s in trace.get("scores") or []:
         v = s.get("value")
         if isinstance(v, (int, float)) and v < 0.5:
             return True

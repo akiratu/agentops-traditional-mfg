@@ -14,16 +14,24 @@ def _setup_two_skills(client):
     v1 = client.post(
         "/skills",
         json={
-            "agent_id": agent_id, "version": 1, "status": "active",
-            "prompt": "v1", "tool_specs": [], "golden_test_cases": [],
+            "agent_id": agent_id,
+            "version": 1,
+            "status": "active",
+            "prompt": "v1",
+            "tool_specs": [],
+            "golden_test_cases": [],
             "sop_source_set_id": "s1",
         },
     ).json()
     v2 = client.post(
         "/skills",
         json={
-            "agent_id": agent_id, "version": 2, "status": "draft",
-            "prompt": "v2", "tool_specs": [], "golden_test_cases": [],
+            "agent_id": agent_id,
+            "version": 2,
+            "status": "draft",
+            "prompt": "v2",
+            "tool_specs": [],
+            "golden_test_cases": [],
             "sop_source_set_id": "s2",
         },
     ).json()

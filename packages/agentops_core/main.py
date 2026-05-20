@@ -1,5 +1,5 @@
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from typing import AsyncIterator
 
 from fastapi import FastAPI
 
@@ -27,7 +27,6 @@ from agentops_core.services.scheduler import (
     start_scheduler,
     stop_scheduler,
 )
-
 
 _scheduler = None
 

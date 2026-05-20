@@ -1,7 +1,11 @@
 import time
 from unittest.mock import MagicMock
 
-from agentops_core.services.scheduler import build_scheduler, start_scheduler, stop_scheduler
+from agentops_core.services.scheduler import (
+    build_scheduler,
+    start_scheduler,
+    stop_scheduler,
+)
 
 
 def test_build_scheduler_registers_jobs():

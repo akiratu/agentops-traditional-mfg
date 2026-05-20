@@ -14,8 +14,12 @@ def _setup(client):
     skill = client.post(
         "/skills",
         json={
-            "agent_id": agent_id, "version": 1, "status": "active",
-            "prompt": "v1", "tool_specs": [], "golden_test_cases": [],
+            "agent_id": agent_id,
+            "version": 1,
+            "status": "active",
+            "prompt": "v1",
+            "tool_specs": [],
+            "golden_test_cases": [],
             "sop_source_set_id": "s1",
         },
     ).json()

@@ -14,10 +14,9 @@ def _mock_orchestrator_background_tasks():
     """Prevent BackgroundTasks from calling orchestrator functions that need
     real DB/LLM connections during API tests.  The orchestrator itself is
     tested separately in test_orchestrator.py."""
-    with patch(
-        "agentops_core.api.anomaly_signal.run_trace_analyzer_for_signal"
-    ), patch(
-        "agentops_core.api.human_flag.run_trace_analyzer_for_signal"
+    with (
+        patch("agentops_core.api.anomaly_signal.run_trace_analyzer_for_signal"),
+        patch("agentops_core.api.human_flag.run_trace_analyzer_for_signal"),
     ):
         yield
 

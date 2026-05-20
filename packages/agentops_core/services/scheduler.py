@@ -4,10 +4,12 @@ We keep this module thin and dependency-free of the detectors themselves —
 detectors are passed in as callables so tests can substitute mocks and the
 main() module can wire in real ones.
 """
+
 from __future__ import annotations
 
 import logging
-from typing import Callable
+from collections.abc import Callable
+from datetime import UTC
 
 from apscheduler.schedulers.background import BackgroundScheduler
 
@@ -46,9 +48,9 @@ def build_scheduler(
 def start_scheduler(sched: BackgroundScheduler) -> None:
     if sched.running:
         return
-    from datetime import datetime, timezone
+    from datetime import datetime
 
-    now = datetime.now(tz=timezone.utc)
+    now = datetime.now(tz=UTC)
     for job in sched.get_jobs():
         sched.modify_job(job.id, next_run_time=now)
     sched.start()

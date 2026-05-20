@@ -7,10 +7,11 @@ creates an AnomalySignal.
 Cost is read from `trace.metadata.cost_usd`. Traces without cost data are
 ignored; if no usable traces exist, the detector silently skips.
 """
+
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from sqlmodel import Session
@@ -43,7 +44,7 @@ def detect_cost_spike_for_agent(
     if _has_open_signal(session, agent_id=agent.id):
         return None
 
-    now = datetime.now(tz=timezone.utc)
+    now = datetime.now(tz=UTC)
     baseline_start = now - timedelta(days=BASELINE_DAYS)
     recent_start = now - timedelta(hours=RECENT_HOURS)
 
@@ -58,10 +59,7 @@ def detect_cost_spike_for_agent(
         return None
 
     baseline, recent = _split_by_recent_window(traces, recent_start)
-    if (
-        len(baseline) < MIN_TRACES_PER_BUCKET
-        or len(recent) < MIN_TRACES_PER_BUCKET
-    ):
+    if len(baseline) < MIN_TRACES_PER_BUCKET or len(recent) < MIN_TRACES_PER_BUCKET:
         return None
 
     baseline_mean = _mean_cost(baseline)
@@ -83,7 +81,9 @@ def detect_cost_spike_for_agent(
     session.refresh(signal)
     log.info(
         "Cost spike on agent %s: baseline=$%.4f, recent=$%.4f (×%.2f) → signal %s",
-        agent.id, baseline_mean, recent_mean,
+        agent.id,
+        baseline_mean,
+        recent_mean,
         recent_mean / baseline_mean if baseline_mean else 0.0,
         signal.id,
     )
@@ -96,12 +96,12 @@ def _split_by_recent_window(
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     baseline: list[dict[str, Any]] = []
     recent: list[dict[str, Any]] = []
-    rs = recent_start if recent_start.tzinfo else recent_start.replace(tzinfo=timezone.utc)
+    rs = recent_start if recent_start.tzinfo else recent_start.replace(tzinfo=UTC)
     for t in traces:
         ts = _parse_iso(t.get("timestamp"))
         if ts is None:
             continue
-        ts_aware = ts if ts.tzinfo else ts.replace(tzinfo=timezone.utc)
+        ts_aware = ts if ts.tzinfo else ts.replace(tzinfo=UTC)
         (recent if ts_aware >= rs else baseline).append(t)
     return baseline, recent
 
@@ -116,10 +116,7 @@ def _parse_iso(value: Any) -> datetime | None:
 
 
 def _mean_cost(traces: list[dict[str, Any]]) -> float | None:
-    values = [
-        t.get("metadata", {}).get(COST_METADATA_KEY)
-        for t in traces
-    ]
+    values = [t.get("metadata", {}).get(COST_METADATA_KEY) for t in traces]
     floats = [v for v in values if isinstance(v, (int, float))]
     if not floats:
         return None

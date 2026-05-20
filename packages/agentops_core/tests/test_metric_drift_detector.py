@@ -1,7 +1,6 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from unittest.mock import MagicMock
 
-import pytest
 from sqlmodel import Session, select
 
 from agentops_core.models.agent import Agent, RuntimeStatus
@@ -21,7 +20,9 @@ def _seed_agent(session: Session) -> Agent:
     session.commit()
     session.refresh(f)
     a = Agent(
-        factory_id=f.id, name="A1", purpose="p",
+        factory_id=f.id,
+        name="A1",
+        purpose="p",
         runtime_status=RuntimeStatus.RUNNING,
     )
     session.add(a)
@@ -34,9 +35,7 @@ def _trace_summary(score_value: float, days_ago: float) -> dict:
     return {
         "id": f"trace_{score_value}_{days_ago}",
         "name": "rca",
-        "timestamp": (
-            datetime.now(tz=timezone.utc) - timedelta(days=days_ago)
-        ).isoformat(),
+        "timestamp": (datetime.now(tz=UTC) - timedelta(days=days_ago)).isoformat(),
         "metadata": {},
         "scores": [{"name": "rca_accuracy", "value": score_value}],
     }
@@ -68,10 +67,10 @@ def test_metric_drift_no_signal_when_stable(session: Session):
     """Both windows around 0.9 → no signal."""
     agent = _seed_agent(session)
     fake_lf = MagicMock()
-    fake_lf.search_traces.return_value = (
-        [_trace_summary(1.0, 8.0), _trace_summary(0.9, 11.0)]
-        + [_trace_summary(0.9, 2.0), _trace_summary(1.0, 4.0)]
-    )
+    fake_lf.search_traces.return_value = [
+        _trace_summary(1.0, 8.0),
+        _trace_summary(0.9, 11.0),
+    ] + [_trace_summary(0.9, 2.0), _trace_summary(1.0, 4.0)]
 
     signal = detect_metric_drift_for_agent(
         agent=agent,
@@ -110,10 +109,11 @@ def test_metric_drift_dedupe_does_not_create_duplicate(session: Session):
     session.commit()
 
     fake_lf = MagicMock()
-    fake_lf.search_traces.return_value = (
-        [_trace_summary(1.0, 8.0), _trace_summary(0.9, 11.0), _trace_summary(0.8, 13.0)]
-        + [_trace_summary(0.0, 1.0), _trace_summary(0.0, 3.0), _trace_summary(0.5, 5.0)]
-    )
+    fake_lf.search_traces.return_value = [
+        _trace_summary(1.0, 8.0),
+        _trace_summary(0.9, 11.0),
+        _trace_summary(0.8, 13.0),
+    ] + [_trace_summary(0.0, 1.0), _trace_summary(0.0, 3.0), _trace_summary(0.5, 5.0)]
     signal = detect_metric_drift_for_agent(
         agent=agent,
         session=session,

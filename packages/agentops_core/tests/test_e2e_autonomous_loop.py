@@ -18,6 +18,7 @@ To exercise this on a real system, set up:
 - Start uvicorn, wait an hour for the scheduler, or call
   ``orchestrator.run_anomaly_check_all_agents()`` directly from a REPL.
 """
+
 import os
 
 import pytest

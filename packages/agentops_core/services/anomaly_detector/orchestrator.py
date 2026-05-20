@@ -16,11 +16,12 @@ Three entry points:
 3. ``run_self_evolve_for_finding(finding_id)`` — called by FastAPI
    BackgroundTasks when a finding is PATCHed to ACCEPTED (Task 10).
 """
+
 from __future__ import annotations
 
 import logging
 import threading
-from typing import Callable
+from collections.abc import Callable
 from uuid import UUID
 
 from sqlmodel import Session, select
@@ -92,9 +93,7 @@ def run_anomaly_check_all_agents(
                         daemon=True,
                     ).start()
             except Exception:
-                log.exception(
-                    "Detector %s failed for agent %s", fn.__name__, agent.id
-                )
+                log.exception("Detector %s failed for agent %s", fn.__name__, agent.id)
 
 
 def run_trace_analyzer_for_signal(
@@ -124,7 +123,9 @@ def run_trace_analyzer_for_signal(
             langfuse_client=lf_factory(),
             settings=get_settings(),
         )
-        log.info("Trace Analyzer produced finding %s for signal %s", finding.id, signal_id)
+        log.info(
+            "Trace Analyzer produced finding %s for signal %s", finding.id, signal_id
+        )
     except Exception:
         log.exception("Trace Analyzer failed for signal %s", signal_id)
 
@@ -158,10 +159,13 @@ def run_self_evolve_for_finding(
         return
     agent = session.get(Agent, signal.agent_id)
     if agent is None or agent.current_skill_id is None:
-        log.warning("Agent missing or no current skill for finding %s; skip", finding_id)
+        log.warning(
+            "Agent missing or no current skill for finding %s; skip", finding_id
+        )
         return
 
     from agentops_core.models.skill import Skill
+
     skill = session.get(Skill, agent.current_skill_id)
     if skill is None:
         log.warning("Skill %s not found; skip", agent.current_skill_id)
@@ -170,6 +174,7 @@ def run_self_evolve_for_finding(
     storage = get_storage()  # returns LocalStorage directly (not a generator)
     settings = get_settings()
     from agentops_core.services.llm_provider import build_provider
+
     provider = build_provider(settings)
 
     try:
@@ -185,5 +190,7 @@ def run_self_evolve_for_finding(
 
     log.info(
         "Self-Evolve produced new skill run %s for finding %s (regression: %s)",
-        new_run_id, finding_id, regression_report.notes,
+        new_run_id,
+        finding_id,
+        regression_report.notes,
     )

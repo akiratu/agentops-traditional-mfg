@@ -117,9 +117,11 @@ class LangfuseTraceClient:
                 {
                     "id": t.id,
                     "name": getattr(t, "name", None),
-                    "timestamp": getattr(t, "timestamp", None).isoformat()
-                    if getattr(t, "timestamp", None)
-                    else None,
+                    "timestamp": (
+                        getattr(t, "timestamp", None).isoformat()
+                        if getattr(t, "timestamp", None)
+                        else None
+                    ),
                     "metadata": getattr(t, "metadata", {}) or {},
                     "scores": scores_dicts,
                 }
@@ -145,7 +147,10 @@ class LangfuseTraceClient:
     def _score_to_dict(score: Any) -> dict[str, Any]:
         if isinstance(score, dict):
             return {"name": score.get("name"), "value": score.get("value")}
-        return {"name": getattr(score, "name", None), "value": getattr(score, "value", None)}
+        return {
+            "name": getattr(score, "name", None),
+            "value": getattr(score, "value", None),
+        }
 
     @staticmethod
     def _is_failure(scores: list[dict[str, Any]]) -> bool:

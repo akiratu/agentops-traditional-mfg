@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
 from sqlalchemy import event
@@ -7,7 +7,7 @@ from sqlmodel import Field, SQLModel
 
 
 def _utcnow() -> datetime:
-    return datetime.now(tz=timezone.utc)
+    return datetime.now(tz=UTC)
 
 
 class TimestampedModel(SQLModel):
@@ -24,7 +24,9 @@ class TimestampedModel(SQLModel):
 
 
 @event.listens_for(SASession, "before_flush")
-def _refresh_updated_at(session: SASession, flush_context, instances) -> None:  # noqa: ARG001
+def _refresh_updated_at(
+    session: SASession, flush_context, instances
+) -> None:  # noqa: ARG001
     for obj in session.dirty:
         if isinstance(obj, TimestampedModel):
             obj.updated_at = _utcnow()
