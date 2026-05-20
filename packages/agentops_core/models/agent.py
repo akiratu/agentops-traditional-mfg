@@ -47,3 +47,7 @@ class AgentRead(SQLModel):
 
 class AgentCurrentSkillUpdate(SQLModel):
     current_skill_id: UUID | None
+
+
+class AgentRuntimeStatusUpdate(SQLModel):
+    runtime_status: RuntimeStatus

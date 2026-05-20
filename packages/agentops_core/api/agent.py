@@ -4,7 +4,14 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
 
 from agentops_core.database import get_session
-from agentops_core.models.agent import Agent, AgentCreate, AgentCurrentSkillUpdate, AgentRead
+from agentops_core.models.agent import (
+    Agent,
+    AgentCreate,
+    AgentCurrentSkillUpdate,
+    AgentRead,
+    AgentRuntimeStatusUpdate,
+    RuntimeStatus,
+)
 from agentops_core.models.skill import Skill
 
 router = APIRouter(prefix="/agents", tags=["agent"])
@@ -63,6 +70,34 @@ def update_agent_current_skill(
             )
 
     agent.current_skill_id = payload.current_skill_id
+    session.add(agent)
+    session.commit()
+    session.refresh(agent)
+    return agent
+
+
+@router.patch("/{agent_id}/runtime-status", response_model=AgentRead)
+def update_agent_runtime_status(
+    agent_id: UUID,
+    payload: AgentRuntimeStatusUpdate,
+    session: Session = Depends(get_session),
+) -> Agent:
+    from datetime import datetime, timezone
+
+    agent = session.get(Agent, agent_id)
+    if agent is None:
+        raise HTTPException(status_code=404, detail="Agent not found")
+
+    # First transition to RUNNING stamps deployed_at. Subsequent transitions
+    # (stopped, error, deploying-again) leave it as a historical first-deploy
+    # marker — operators can read it as "first went live at".
+    if (
+        payload.runtime_status == RuntimeStatus.RUNNING
+        and agent.deployed_at is None
+    ):
+        agent.deployed_at = datetime.now(tz=timezone.utc)
+
+    agent.runtime_status = payload.runtime_status
     session.add(agent)
     session.commit()
     session.refresh(agent)

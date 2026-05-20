@@ -3,6 +3,7 @@ from agentops_core.models.agent import (
     AgentCreate,
     AgentCurrentSkillUpdate,
     AgentRead,
+    AgentRuntimeStatusUpdate,
     RuntimeStatus,
 )
 from agentops_core.models.anomaly_signal import (
@@ -58,6 +59,7 @@ __all__ = [
     "AgentCreate",
     "AgentCurrentSkillUpdate",
     "AgentRead",
+    "AgentRuntimeStatusUpdate",
     "RuntimeStatus",
     "SOPSource",
     "SOPSourceCreate",
