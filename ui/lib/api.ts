@@ -3,8 +3,6 @@ import type {
   AgentRead,
   AgentRuntimeStatusUpdate,
   AnomalySignalRead,
-  AnomalySourceType,
-  AnomalyStatus,
   FactoryRead,
   RCAFindingRead,
   RCAFindingStatusUpdate,
@@ -30,6 +28,27 @@ class ApiError extends Error {
   }
 }
 
+async function extractErrorDetail(res: Response): Promise<string> {
+  try {
+    const body = (await res.json()) as { detail?: unknown }
+    if (typeof body.detail === 'string') return body.detail
+    if (Array.isArray(body.detail)) {
+      // FastAPI 422 validation errors: array of { loc, msg, type }
+      return body.detail
+        .map((e: unknown) => {
+          if (typeof e === 'object' && e !== null && 'msg' in e) {
+            return String((e as { msg: unknown }).msg)
+          }
+          return JSON.stringify(e)
+        })
+        .join('; ')
+    }
+    return res.statusText
+  } catch {
+    return res.statusText
+  }
+}
+
 async function http<T>(
   path: string,
   init?: RequestInit & { json?: unknown }
@@ -46,13 +65,7 @@ async function http<T>(
     body: json !== undefined ? JSON.stringify(json) : rest.body,
   })
   if (!res.ok) {
-    let detail: string
-    try {
-      const body = (await res.json()) as { detail?: string }
-      detail = body.detail ?? res.statusText
-    } catch {
-      detail = res.statusText
-    }
+    const detail = await extractErrorDetail(res)
     throw new ApiError(res.status, detail, url)
   }
   if (res.status === 204) return undefined as T
@@ -90,11 +103,13 @@ export const api = {
     http<SkillRead>(`/skills/${id}/status`, { method: 'PATCH', json: body }),
 
   // anomalies
-  listAnomalySignals: (filter: {
-    agent_id?: UUID
-    source_type?: AnomalySourceType
-    status?: AnomalyStatus
-  }) => http<AnomalySignalRead[]>(`/anomaly-signals${qs(filter)}`),
+  /**
+   * GET /anomaly-signals — backend currently only filters by agent_id.
+   * For source_type / status filtering, fetch and filter client-side
+   * (see app/anomalies/page.tsx in Task 7).
+   */
+  listAnomalySignals: (filter: { agent_id?: UUID } = {}) =>
+    http<AnomalySignalRead[]>(`/anomaly-signals${qs(filter)}`),
 
   // findings
   getFinding: (id: UUID) => http<RCAFindingRead>(`/rca-findings/${id}`),
@@ -119,7 +134,8 @@ export const api = {
       body: form,
     })
     if (!res.ok) {
-      throw new ApiError(res.status, await res.text(), res.url)
+      const detail = await extractErrorDetail(res)
+      throw new ApiError(res.status, detail, res.url)
     }
     return (await res.json()) as SOPSourceRead
   },
