@@ -43,3 +43,7 @@ class AgentRead(SQLModel):
     deployed_at: datetime | None
     created_at: datetime
     updated_at: datetime
+
+
+class AgentCurrentSkillUpdate(SQLModel):
+    current_skill_id: UUID | None

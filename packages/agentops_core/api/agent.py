@@ -4,7 +4,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
 
 from agentops_core.database import get_session
-from agentops_core.models.agent import Agent, AgentCreate, AgentRead
+from agentops_core.models.agent import Agent, AgentCreate, AgentCurrentSkillUpdate, AgentRead
+from agentops_core.models.skill import Skill
 
 router = APIRouter(prefix="/agents", tags=["agent"])
 
@@ -36,4 +37,33 @@ def get_agent(agent_id: UUID, session: Session = Depends(get_session)) -> Agent:
     agent = session.get(Agent, agent_id)
     if agent is None:
         raise HTTPException(status_code=404, detail="Agent not found")
+    return agent
+
+
+@router.patch("/{agent_id}/current-skill", response_model=AgentRead)
+def update_agent_current_skill(
+    agent_id: UUID,
+    payload: AgentCurrentSkillUpdate,
+    session: Session = Depends(get_session),
+) -> Agent:
+    agent = session.get(Agent, agent_id)
+    if agent is None:
+        raise HTTPException(status_code=404, detail="Agent not found")
+
+    if payload.current_skill_id is not None:
+        skill = session.get(Skill, payload.current_skill_id)
+        if skill is None:
+            raise HTTPException(
+                status_code=400, detail="Skill not found; cannot promote"
+            )
+        if skill.agent_id != agent.id:
+            raise HTTPException(
+                status_code=400,
+                detail="Skill belongs to a different agent",
+            )
+
+    agent.current_skill_id = payload.current_skill_id
+    session.add(agent)
+    session.commit()
+    session.refresh(agent)
     return agent

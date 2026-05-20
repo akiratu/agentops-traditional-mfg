@@ -1,6 +1,7 @@
 from agentops_core.models.agent import (
     Agent,
     AgentCreate,
+    AgentCurrentSkillUpdate,
     AgentRead,
     RuntimeStatus,
 )
@@ -55,6 +56,7 @@ __all__ = [
     "FactoryRead",
     "Agent",
     "AgentCreate",
+    "AgentCurrentSkillUpdate",
     "AgentRead",
     "RuntimeStatus",
     "SOPSource",
