@@ -55,3 +55,7 @@ class SkillRead(SQLModel):
     generated_by_run_id: str | None
     created_at: datetime
     updated_at: datetime
+
+
+class SkillStatusUpdate(SQLModel):
+    status: SkillStatus

@@ -38,6 +38,7 @@ from agentops_core.models.skill import (
     SkillCreate,
     SkillRead,
     SkillStatus,
+    SkillStatusUpdate,
 )
 from agentops_core.models.sop_source import (
     SOPSource,
@@ -64,6 +65,7 @@ __all__ = [
     "SkillCreate",
     "SkillRead",
     "SkillStatus",
+    "SkillStatusUpdate",
     "AnomalySignal",
     "AnomalySignalCreate",
     "AnomalySignalRead",

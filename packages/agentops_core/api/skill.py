@@ -4,7 +4,13 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
 
 from agentops_core.database import get_session
-from agentops_core.models.skill import Skill, SkillCreate, SkillRead
+from agentops_core.models.skill import (
+    Skill,
+    SkillCreate,
+    SkillRead,
+    SkillStatus,
+    SkillStatusUpdate,
+)
 
 router = APIRouter(prefix="/skills", tags=["skill"])
 
@@ -36,4 +42,36 @@ def get_skill(skill_id: UUID, session: Session = Depends(get_session)) -> Skill:
     skill = session.get(Skill, skill_id)
     if skill is None:
         raise HTTPException(status_code=404, detail="Skill not found")
+    return skill
+
+
+@router.patch("/{skill_id}/status", response_model=SkillRead)
+def update_skill_status(
+    skill_id: UUID,
+    payload: SkillStatusUpdate,
+    session: Session = Depends(get_session),
+) -> Skill:
+    skill = session.get(Skill, skill_id)
+    if skill is None:
+        raise HTTPException(status_code=404, detail="Skill not found")
+
+    # If promoting to ACTIVE, demote any other ACTIVE skill on the same agent
+    # to ARCHIVED. Enforces "exactly one active skill per agent" at the
+    # business-logic layer (DB has no constraint).
+    if payload.status == SkillStatus.ACTIVE:
+        others = session.exec(
+            select(Skill).where(
+                Skill.agent_id == skill.agent_id,
+                Skill.id != skill.id,
+                Skill.status == SkillStatus.ACTIVE,
+            )
+        ).all()
+        for other in others:
+            other.status = SkillStatus.ARCHIVED
+            session.add(other)
+
+    skill.status = payload.status
+    session.add(skill)
+    session.commit()
+    session.refresh(skill)
     return skill
