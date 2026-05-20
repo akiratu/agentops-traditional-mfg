@@ -88,37 +88,43 @@ class LangfuseTraceClient:
     ) -> list[dict[str, Any]]:
         """Return a list of trace summary dicts.
 
+        When ``only_failures=True``, keeps only traces with a score named
+        ``rca_accuracy`` (or any score whose value is < 0.5). A trace
+        without any scores is treated as "unknown" and excluded.
+
         Summary shape:
-        {"id": str, "name": str, "timestamp": str (ISO), "metadata": dict}
+        {"id": str, "name": str, "timestamp": str (ISO), "metadata": dict,
+         "scores": list[dict]}
         """
         if not self.sdk_client:
             raise RuntimeError("Langfuse SDK not initialized; check keys")
-        # Langfuse 2.x: fetch_traces accepts various kwargs. We pass a conservative
-        # subset; richer filtering (only_failures via scores) lives in caller code.
         kwargs: dict[str, Any] = {"limit": limit}
         if agent_id:
-            # We tag traces with metadata.agent_id when emitting from our runtime.
-            kwargs["user_id"] = (
-                agent_id  # langfuse v2: user_id is the conventional bucket
-            )
+            kwargs["user_id"] = agent_id
         if since:
             kwargs["from_timestamp"] = since
         if until:
             kwargs["to_timestamp"] = until
         resp = self.sdk_client.fetch_traces(**kwargs)
-        return [
-            {
-                "id": t.id,
-                "name": getattr(t, "name", None),
-                "timestamp": (
-                    getattr(t, "timestamp", None).isoformat()
+
+        summaries: list[dict[str, Any]] = []
+        for t in resp.data or []:
+            scores = list(getattr(t, "scores", []) or [])
+            scores_dicts = [self._score_to_dict(s) for s in scores]
+            if only_failures and not self._is_failure(scores_dicts):
+                continue
+            summaries.append(
+                {
+                    "id": t.id,
+                    "name": getattr(t, "name", None),
+                    "timestamp": getattr(t, "timestamp", None).isoformat()
                     if getattr(t, "timestamp", None)
-                    else None
-                ),
-                "metadata": getattr(t, "metadata", {}) or {},
-            }
-            for t in (resp.data or [])
-        ]
+                    else None,
+                    "metadata": getattr(t, "metadata", {}) or {},
+                    "scores": scores_dicts,
+                }
+            )
+        return summaries
 
     @staticmethod
     def _obs_to_dict(o: Any) -> dict[str, Any]:
@@ -134,3 +140,24 @@ class LangfuseTraceClient:
                 else None
             ),
         }
+
+    @staticmethod
+    def _score_to_dict(score: Any) -> dict[str, Any]:
+        if isinstance(score, dict):
+            return {"name": score.get("name"), "value": score.get("value")}
+        return {"name": getattr(score, "name", None), "value": getattr(score, "value", None)}
+
+    @staticmethod
+    def _is_failure(scores: list[dict[str, Any]]) -> bool:
+        """A trace is a failure if any score has value < 0.5.
+
+        Convention: success scores live in [0, 1] (Langfuse convention),
+        with 1.0 = perfect match and 0.0 = total miss. The 0.5 boundary
+        treats "partial" (e.g. 0.4) as a failure-side signal, since
+        partial misses are exactly what Self-Evolve should learn from.
+        """
+        for s in scores:
+            v = s.get("value")
+            if isinstance(v, (int, float)) and v < 0.5:
+                return True
+        return False
