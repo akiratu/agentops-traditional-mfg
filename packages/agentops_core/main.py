@@ -4,6 +4,7 @@ from agentops_core.api import (
     agent,
     anomaly_signal,
     factory,
+    human_flag,
     portfolio_generation,
     rca_finding,
     regression_run,
@@ -31,5 +32,6 @@ app.include_router(regression_run.router)
 app.include_router(self_evolve.router)
 app.include_router(skill_generation.router)
 app.include_router(sop_upload.router)
+app.include_router(human_flag.router)
 app.include_router(portfolio_generation.router)
 app.include_router(trace_analysis.router)
