@@ -1,0 +1,132 @@
+import type {
+  AgentCurrentSkillUpdate,
+  AgentRead,
+  AgentRuntimeStatusUpdate,
+  AnomalySignalRead,
+  AnomalySourceType,
+  AnomalyStatus,
+  FactoryRead,
+  RCAFindingRead,
+  RCAFindingStatusUpdate,
+  RegressionRunRead,
+  SOPSourceRead,
+  SOPSourceType,
+  SkillGenerationRequest,
+  SkillRead,
+  SkillStatusUpdate,
+  UUID,
+} from './types'
+
+const BASE = '/api'
+
+class ApiError extends Error {
+  constructor(
+    public status: number,
+    public detail: string,
+    public url: string
+  ) {
+    super(`${status} ${detail} (${url})`)
+    this.name = 'ApiError'
+  }
+}
+
+async function http<T>(
+  path: string,
+  init?: RequestInit & { json?: unknown }
+): Promise<T> {
+  const url = `${BASE}${path}`
+  const { json, headers, ...rest } = init ?? {}
+  const res = await fetch(url, {
+    ...rest,
+    headers: {
+      Accept: 'application/json',
+      ...(json !== undefined ? { 'Content-Type': 'application/json' } : {}),
+      ...headers,
+    },
+    body: json !== undefined ? JSON.stringify(json) : rest.body,
+  })
+  if (!res.ok) {
+    let detail: string
+    try {
+      const body = (await res.json()) as { detail?: string }
+      detail = body.detail ?? res.statusText
+    } catch {
+      detail = res.statusText
+    }
+    throw new ApiError(res.status, detail, url)
+  }
+  if (res.status === 204) return undefined as T
+  return (await res.json()) as T
+}
+
+function qs(params: Record<string, string | number | undefined | null>): string {
+  const usp = new URLSearchParams()
+  for (const [k, v] of Object.entries(params)) {
+    if (v !== undefined && v !== null && v !== '') usp.set(k, String(v))
+  }
+  const s = usp.toString()
+  return s ? `?${s}` : ''
+}
+
+export const api = {
+  // factories
+  listFactories: () => http<FactoryRead[]>('/factories'),
+  getFactory: (id: UUID) => http<FactoryRead>(`/factories/${id}`),
+
+  // agents
+  listAgents: (factoryId?: UUID) =>
+    http<AgentRead[]>(`/agents${qs({ factory_id: factoryId })}`),
+  getAgent: (id: UUID) => http<AgentRead>(`/agents/${id}`),
+  patchAgentRuntimeStatus: (id: UUID, body: AgentRuntimeStatusUpdate) =>
+    http<AgentRead>(`/agents/${id}/runtime-status`, { method: 'PATCH', json: body }),
+  patchAgentCurrentSkill: (id: UUID, body: AgentCurrentSkillUpdate) =>
+    http<AgentRead>(`/agents/${id}/current-skill`, { method: 'PATCH', json: body }),
+
+  // skills
+  listSkills: (agentId?: UUID) =>
+    http<SkillRead[]>(`/skills${qs({ agent_id: agentId })}`),
+  getSkill: (id: UUID) => http<SkillRead>(`/skills/${id}`),
+  patchSkillStatus: (id: UUID, body: SkillStatusUpdate) =>
+    http<SkillRead>(`/skills/${id}/status`, { method: 'PATCH', json: body }),
+
+  // anomalies
+  listAnomalySignals: (filter: {
+    agent_id?: UUID
+    source_type?: AnomalySourceType
+    status?: AnomalyStatus
+  }) => http<AnomalySignalRead[]>(`/anomaly-signals${qs(filter)}`),
+
+  // findings
+  getFinding: (id: UUID) => http<RCAFindingRead>(`/rca-findings/${id}`),
+  listFindings: (anomalySignalId?: UUID) =>
+    http<RCAFindingRead[]>(
+      `/rca-findings${qs({ anomaly_signal_id: anomalySignalId })}`
+    ),
+  patchFindingStatus: (id: UUID, body: RCAFindingStatusUpdate) =>
+    http<RCAFindingRead>(`/rca-findings/${id}/status`, { method: 'PATCH', json: body }),
+
+  // regression
+  listRegressionRuns: () => http<RegressionRunRead[]>('/regression-runs'),
+  getRegressionRun: (id: UUID) => http<RegressionRunRead>(`/regression-runs/${id}`),
+
+  // sop upload (multipart)
+  uploadSOP: async (factoryId: UUID, file: File, type: SOPSourceType): Promise<SOPSourceRead> => {
+    const form = new FormData()
+    form.append('file', file)
+    form.append('type', type)
+    const res = await fetch(`${BASE}/factories/${factoryId}/sop-uploads`, {
+      method: 'POST',
+      body: form,
+    })
+    if (!res.ok) {
+      throw new ApiError(res.status, await res.text(), res.url)
+    }
+    return (await res.json()) as SOPSourceRead
+  },
+
+  // skill generation
+  generateSkill: (body: SkillGenerationRequest) =>
+    http<SkillRead>('/skill-generations', { method: 'POST', json: body }),
+}
+
+export { ApiError }
