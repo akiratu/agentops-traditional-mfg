@@ -7,7 +7,10 @@
 #   1. Removes ALL factory/agent/skill/signal/finding/regression rows
 #   2. Re-seeds the 3 government-plan domains
 #   3. Pre-presses Accept on the metal-mfg finding and waits ~4 min for
-#      Self-Evolve to produce v2 (so the demo can show v1+v2 without waiting)
+#      Self-Evolve to produce v2 (so the demo can show v1+v2 without waiting).
+#      v2 is left as DRAFT so the demo can end with "click Promote" as the
+#      live interaction moment — v1 ACTIVE / v2 DRAFT side-by-side, ready for
+#      the human-in-loop ceremony.
 #
 # Output: the URLs to open for the demo.
 #
@@ -54,18 +57,11 @@ for i in $(seq 1 24); do
   N=$(curl -s "$BACKEND/skills?agent_id=$AID" | python3 -c "import json,sys; print(len(json.load(sys.stdin)))" 2>/dev/null)
   echo -n "    "; date +%H:%M:%S; printf "      skill count: %s\n" "$N"
   if [ "${N:-0}" -ge 2 ]; then
-    # Promote v2 too so the demo end-state shows v1 archived + v2 active
-    V2=$(curl -s "$BACKEND/skills?agent_id=$AID" | python3 -c "
-import json,sys
-ss = sorted(json.load(sys.stdin), key=lambda s: s['version'])
-print(ss[-1]['id'])  # highest version
-")
-    echo "    Promoting v2 → ACTIVE (demo end-state)..."
-    curl -s -X PATCH "$BACKEND/skills/$V2/status" \
-      -H 'content-type: application/json' \
-      -d '{"status":"active"}' > /dev/null
+    # Intentionally leave v2 as DRAFT — the demo's final step is the human
+    # pressing "Promote to ACTIVE" on the skill timeline. That's the visible
+    # human-in-loop moment, the dramatic close.
     echo ""
-    echo "✓ Demo ready."
+    echo "✓ Demo ready. (v2 left as DRAFT so demo can end with the Promote click.)"
     FACT_URL=$(curl -s "$BACKEND/factories" | python3 -c "import json,sys; print(json.load(sys.stdin)[0]['id'])")
     echo ""
     echo "================================================================"

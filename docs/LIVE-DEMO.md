@@ -87,10 +87,13 @@ http://localhost:3001/skills/<agent-id>   ← reset_demo.sh 會印給你
 > 大約 4 分鐘後,新版 v2 skill 自動出現。」
 
 **指著看:**
-- 左邊 timeline:v2 ACTIVE(綠色邊框 + 「目前 current」標)、v1 ARCHIVED(灰色)
+- 左邊 timeline:**v1 ACTIVE**(綠色 + 「目前 current」標)、**v2 DRAFT**(等主管按 Promote)
 - 右邊 diff:左 v1、右 v2,中間 AI 加上去的補強內容上綠色
+- v2 卡片右側有「升為 ACTIVE」按鈕
 
 > 「右邊看到的是 v1 → v2 的差異,綠色那幾行就是 AI 為了修補剛剛那個失敗案例,自己寫進 prompt 的補強規則。完全 additive — 沒砍掉舊的,只加新的。」
+>
+> 「但 v2 還是 DRAFT — 因為平台設計需要主管最後再看一眼,確認沒問題才升為 ACTIVE。這是第二道人類關卡。」
 
 ### 5. 看 AI 改完真的有效(3 分鐘)
 **點 sidebar 的 Regression Runs**
@@ -105,7 +108,21 @@ http://localhost:3001/skills/<agent-id>   ← reset_demo.sh 會印給你
 > 也就是說,AI 不是隨便改 prompt — 它改完還會自己跑回歸測試確認。
 > 如果失敗,verdict 會是 needs_review,主管就要再看一次。」
 
-### 6. 看其他兩個場域(各 1 分鐘)
+### 6. 殺手鐧結尾:主管按下 Promote(2 分鐘)
+**回到 Skill Timeline 頁,在 v2 卡片上按「升為 ACTIVE」**
+
+> 「demo 最後,讓我直接讓主管/評審看一次最重要的動作 — 主管確認過 v2 內容沒問題,按下 Promote。」
+
+**現場按按鈕,觀眾看到:**
+- v2 卡片變綠色邊框 + 「current」標
+- v1 卡片變灰色(archived)
+- Agent dashboard 右上角徽章自動從 v1 → v2 切換
+
+> 「按一下,整個 runtime 就切到 v2 了。下一個進來的 anomaly,Agent 就會用 v2 的新規則去分析。
+>
+> 從 SOP 進來、AI 自己看、AI 自己改、人最後確認 — 整套 loop 就跑完了。」
+
+### 7. 看其他兩個場域(各 1 分鐘)
 **回到 factories 列表 → 點 XX 半導體封測 → 點封測 RCA Agent**
 
 > 「同一套平台、不同場域。半導體封測的 Agent 看的東西不一樣 — 良率下降、Bin 突升、Tester 停機。」
@@ -115,7 +132,7 @@ http://localhost:3001/skills/<agent-id>   ← reset_demo.sh 會印給你
 > 「客服場域是 Plan A 的 flow2skill 技術,從 SOP 自動生 skill 給客服中心用。
 > 同一個平台、三個場域、三套不同的 skill。」
 
-### 7. Build 階段(可選,1 分鐘,口頭講就好)
+### 8. Build 階段(可選,1 分鐘,口頭講就好)
 **點 SOP Upload(sidebar)**
 
 ```

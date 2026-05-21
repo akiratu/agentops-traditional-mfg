@@ -154,13 +154,20 @@ export default function FindingDetailPage({
                     isPending={acceptM.isPending || rejectM.isPending}
                     onAccept={() => acceptM.mutate()}
                     onReject={() => rejectM.mutate()}
-                    hint={
-                      f.status === 'accepted'
-                        ? pollExpired
-                          ? 'Self-Evolve 仍在處理 — 手動 refresh 重試,或到 Skill Timeline 檢查'
-                          : '等候 Self-Evolve 完成 (polling 5s)'
-                        : undefined
-                    }
+                    hint={(() => {
+                      if (f.status !== 'accepted') return undefined
+                      // If we can already see >=2 skills for this agent (the
+                      // original + at least one Self-Evolved version), the loop
+                      // is done — don't show the "等候" spinner forever.
+                      const totalSkills = skillsQ.data?.length ?? 0
+                      if (totalSkills >= 2) {
+                        return '✓ Self-Evolve 已完成 — 點上方 Skill Timeline 看新版'
+                      }
+                      if (pollExpired) {
+                        return 'Self-Evolve 仍在處理 — 手動 refresh 重試,或到 Skill Timeline 檢查'
+                      }
+                      return '等候 Self-Evolve 完成 (polling 5s)'
+                    })()}
                   />
                 </aside>
               </div>
