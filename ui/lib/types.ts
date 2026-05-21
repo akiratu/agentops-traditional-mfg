@@ -144,6 +144,23 @@ export interface SOPSourceRead {
   updated_at: ISODateTime
 }
 
+// --- PortfolioGenerationRequest / Response ---
+export interface PortfolioGenerationRequest {
+  factory_id: UUID
+  sop_source_ids: UUID[]
+  description: string
+}
+export interface PortfolioAgentResult {
+  id: UUID
+  name: string
+  purpose: string
+  skill_ids: UUID[]
+}
+export interface PortfolioGenerationResponse {
+  run_id: string
+  agents: PortfolioAgentResult[]
+}
+
 // --- SkillGenerationRequest (POST body) ---
 export interface SkillGenerationRequest {
   agent_id: UUID

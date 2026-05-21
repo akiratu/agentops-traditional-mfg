@@ -4,6 +4,8 @@ import type {
   AgentRuntimeStatusUpdate,
   AnomalySignalRead,
   FactoryRead,
+  PortfolioGenerationRequest,
+  PortfolioGenerationResponse,
   RCAFindingRead,
   RCAFindingStatusUpdate,
   RegressionRunRead,
@@ -159,6 +161,26 @@ export const api = {
       throw new ApiError(res.status, detail, res.url)
     }
     return (await res.json()) as SkillRead
+  },
+
+  // portfolio generation — long-running (5-10 min). flows2agents analyzes the
+  // SOPs and decides how to split them into N agents (each with one skill).
+  // Returns the full list. Same direct-to-backend pattern as generateSkill.
+  generatePortfolio: async (
+    body: PortfolioGenerationRequest
+  ): Promise<PortfolioGenerationResponse> => {
+    const directBackend =
+      process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:8000'
+    const res = await fetch(`${directBackend}/portfolio-generations`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify(body),
+    })
+    if (!res.ok) {
+      const detail = await extractErrorDetail(res)
+      throw new ApiError(res.status, detail, res.url)
+    }
+    return (await res.json()) as PortfolioGenerationResponse
   },
 }
 
