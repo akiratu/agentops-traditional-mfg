@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
 
 from agentops_core.database import get_session
+from agentops_core.models.agent import Agent
 from agentops_core.models.skill import (
     Skill,
     SkillCreate,
@@ -56,8 +57,9 @@ def update_skill_status(
         raise HTTPException(status_code=404, detail="Skill not found")
 
     # If promoting to ACTIVE, demote any other ACTIVE skill on the same agent
-    # to ARCHIVED. Enforces "exactly one active skill per agent" at the
-    # business-logic layer (DB has no constraint).
+    # to ARCHIVED and update the agent's current_skill_id pointer. Enforces
+    # "exactly one active skill per agent" at the business-logic layer and
+    # keeps the runtime pointer in sync with the active version.
     if payload.status == SkillStatus.ACTIVE:
         others = session.exec(
             select(Skill).where(
@@ -69,6 +71,10 @@ def update_skill_status(
         for other in others:
             other.status = SkillStatus.ARCHIVED
             session.add(other)
+        agent = session.get(Agent, skill.agent_id)
+        if agent is not None:
+            agent.current_skill_id = skill.id
+            session.add(agent)
 
     skill.status = payload.status
     session.add(skill)

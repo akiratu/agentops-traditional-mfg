@@ -55,6 +55,19 @@ def test_promote_to_active_archives_previous_active(client):
     assert v1_after["status"] == "archived"
 
 
+def test_promote_to_active_updates_agent_current_skill_id(client):
+    """When v2 becomes ACTIVE, the agent's current_skill_id should auto-update
+    so the runtime points at the right version (UI dashboard badge stays in
+    sync with the skill timeline)."""
+    _v1, v2, agent_id = _setup_two_skills(client)
+
+    response = client.patch(f"/skills/{v2['id']}/status", json={"status": "active"})
+    assert response.status_code == 200
+
+    agent_after = client.get(f"/agents/{agent_id}").json()
+    assert agent_after["current_skill_id"] == v2["id"]
+
+
 def test_patch_skill_status_invalid_value(client):
     _, v2, _ = _setup_two_skills(client)
     response = client.patch(f"/skills/{v2['id']}/status", json={"status": "banana"})
