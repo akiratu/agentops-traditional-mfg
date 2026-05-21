@@ -49,15 +49,24 @@ v2 在 Procedure Step 2 加了**「異常模式 → 優先工具」3-way 映射*
 - v0.3 開發時的 dogfood 對象(新功能用這個 factory + agent 測試)
 - v0.5 UI demo seed 來源(`scripts/seed_metal_mfg_demo_for_ui.py`)
 
-## 2026-05-21 更新:內容語言全部 zh-TW
+## 2026-05-21 更新:LLM 直出中文(取代原英文版)
 
-原 2026-05-20 跑出來的 `04_trace_analysis.json` 中 `expected_outcome` / `actual_outcome` /
-`root_cause_summary` 是英文(Gemini Pro 預設語言)。Plan 5 UI 上線後做了 i18n,
-這份內容也同步改為繁體中文。
+原 2026-05-20 跑出來的 `04_trace_analysis.json` 是 Gemini Pro 在無語言指令下
+出英文。Plan 5 UI 上線後,將 trace analyzer 的 system prompt 加上「Respond in
+Traditional Chinese」指令,並重跑同一組 metal-mfg traces — 取得了 LLM **直接**
+產出的繁體中文 RCA finding。本檔已用該結果覆蓋。
 
-- 同時把 `packages/agentops_core/services/trace_analyzer/prompts/system.txt` 加上
-  「Respond in Traditional Chinese」指令,以後跑 trace analyzer 直接出中文。
-- 英文原版在 git 歷史 `b0084b9` 之後可追,做為 LLM-prompt-language-default 的參考。
-- 一次 2026-05-21 Gemini Pro 驗證(signal `29f195ed`,finding `4da46677`)確認
-  prompt 改變後輸出完全是中文。本檔的 3-case 版本則由原英文直譯保留,
-  讓 demo 故事更完整。
+**注意:今日 Gemini 2.5 Pro 只回 1 個 FailureCase(而非 May 20 的 3 個):**
+原 May 20 在 5 個 iteration 內辨識出 3 個獨立 SOP 原型(熱變形 / 換班 / 材料批次)。
+今日 May 21 重跑(signal `3ad979e4`, finding `0b831e93`)耗 16 iterations 後只
+辨識出 1 個共通模式(多機台同時發生 → 查環境)。可能原因:
+- Gemini Pro 模型版本可能微調
+- 即使 prompt 明確要求「per-pattern 一個 case」,LLM 仍判定 3 個 trace 共享同一根因
+- LLM stochasticity
+
+**選擇接受 LLM 真實輸出而非手動翻譯**,讓 demo 反映平台真實行為。完整 3-case
+英文原版仍在 git 歷史 `b0084b9` 可查。
+
+**同步修了一個 Plan 4 bug:** `langfuse_client.search_traces` 之前讓 caller 直接
+傳 `limit=500`,被 Langfuse `/v1/traces` 端點 reject(max=100)。已在
+`packages/agentops_core/services/langfuse_client.py` 加 server 端 cap。

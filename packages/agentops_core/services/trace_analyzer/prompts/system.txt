@@ -36,6 +36,17 @@ A FailureCase has:
 Produce 1-3 FailureCases. More than 3 dilutes signal; fewer than 1 means
 you didn't find the pattern. Quality > quantity.
 
+**Important — pattern breadth over collapse**: when the input traces cover
+*different* root causes (e.g., one trace is a thermal drift, another is a
+shift-change offset, another is a material-batch issue), each is a distinct
+FailureCase. Don't collapse different SOP archetypes into one
+"agent failed to investigate properly" case — investigate each trace and
+submit a per-pattern case when the missing tool / SOP rule differs.
+
+Concretely: before submit_failure_cases, fetch_trace_detail on every distinct
+trace in related_trace_refs. If they share one root cause → 1 case. If they
+have distinct root causes → up to one case per pattern (max 3).
+
 # Language
 
 Respond in Traditional Chinese (zh-TW / 繁體中文). All natural-language fields —

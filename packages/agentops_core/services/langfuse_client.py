@@ -98,7 +98,12 @@ class LangfuseTraceClient:
         """
         if not self.sdk_client:
             raise RuntimeError("Langfuse SDK not initialized; check keys")
-        kwargs: dict[str, Any] = {"limit": limit}
+        # Langfuse `/v1/traces` rejects limit > 100. Cap so callers (LLM tool
+        # calls and scheduled detectors) can't push past the API limit. If a
+        # caller needs more than 100, they should page (Langfuse SDK supports
+        # `page` parameter) — out of scope for v0.5.
+        safe_limit = max(1, min(int(limit), 100))
+        kwargs: dict[str, Any] = {"limit": safe_limit}
         if agent_id:
             kwargs["user_id"] = agent_id
         if since:

@@ -16,6 +16,9 @@ from typing import Any
 from agentops_core.services.langfuse_client import LangfuseTraceClient
 
 
+_LANGFUSE_MAX_LIMIT = 100
+
+
 def search_traces_tool(
     client: LangfuseTraceClient,
     *,
@@ -24,9 +27,15 @@ def search_traces_tool(
     limit: int = 20,
     only_failures: bool = False,
 ) -> list[dict[str, Any]]:
-    """List recent traces for an agent (default: 20 most recent)."""
+    """List recent traces for an agent (default: 20 most recent).
+
+    Langfuse's `/v1/traces` endpoint rejects ``limit > 100``. Cap server-side so
+    the LLM tool call can't push past the API limit (the JSON schema documents
+    ``max 100`` but doesn't enforce it).
+    """
+    safe_limit = max(1, min(int(limit), _LANGFUSE_MAX_LIMIT))
     return client.search_traces(
-        agent_id=agent_id, since=since, limit=limit, only_failures=only_failures
+        agent_id=agent_id, since=since, limit=safe_limit, only_failures=only_failures
     )
 
 
