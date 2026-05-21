@@ -2,6 +2,7 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from agentops_core.api import (
     agent,
@@ -50,6 +51,22 @@ app = FastAPI(
     version="0.1.0",
     lifespan=lifespan,
 )
+
+# Allow the UI dev server (and a few common local ports) to call the API
+# directly — necessary for long-running endpoints like POST /skill-generations
+# where Next.js's dev proxy times out at ~30s while Gemini Pro mining takes
+# 2-3 min. Production deployments should pin to specific origins.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:3001",
+        "http://127.0.0.1:3001",
+    ],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 app.include_router(root_router)
 app.include_router(factory.router)
 app.include_router(agent.router)

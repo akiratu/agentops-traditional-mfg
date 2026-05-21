@@ -142,9 +142,24 @@ export const api = {
     return (await res.json()) as SOPSourceRead
   },
 
-  // skill generation
-  generateSkill: (body: SkillGenerationRequest) =>
-    http<SkillRead>('/skill-generations', { method: 'POST', json: body }),
+  // skill generation — long-running (2-3 min Gemini mining). Bypass Next.js
+  // dev proxy because it times out the socket at ~30s; go straight to the
+  // backend (CORS is configured for localhost:3001). Other endpoints can
+  // keep using the proxy because they're sub-second.
+  generateSkill: async (body: SkillGenerationRequest): Promise<SkillRead> => {
+    const directBackend =
+      process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:8000'
+    const res = await fetch(`${directBackend}/skill-generations`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify(body),
+    })
+    if (!res.ok) {
+      const detail = await extractErrorDetail(res)
+      throw new ApiError(res.status, detail, res.url)
+    }
+    return (await res.json()) as SkillRead
+  },
 }
 
 export { ApiError }
