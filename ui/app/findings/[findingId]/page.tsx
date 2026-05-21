@@ -154,17 +154,23 @@ export default function FindingDetailPage({
                     isPending={acceptM.isPending || rejectM.isPending}
                     onAccept={() => acceptM.mutate()}
                     onReject={() => rejectM.mutate()}
+                    skillTimelineHref={(() => {
+                      if (f.status !== 'accepted') return undefined
+                      const totalSkills = skillsQ.data?.length ?? 0
+                      // Only surface the link once Self-Evolve actually produced
+                      // a v_next skill (otherwise the timeline page would just
+                      // show v1 and confuse the audience).
+                      if (totalSkills < 2 || !agentId) return undefined
+                      return `/skills/${agentId}`
+                    })()}
                     hint={(() => {
                       if (f.status !== 'accepted') return undefined
-                      // If we can already see >=2 skills for this agent (the
-                      // original + at least one Self-Evolved version), the loop
-                      // is done — don't show the "等候" spinner forever.
                       const totalSkills = skillsQ.data?.length ?? 0
                       if (totalSkills >= 2) {
-                        return '✓ Self-Evolve 已完成 — 點上方 Skill Timeline 看新版'
+                        return '✓ Self-Evolve 已完成'
                       }
                       if (pollExpired) {
-                        return 'Self-Evolve 仍在處理 — 手動 refresh 重試,或到 Skill Timeline 檢查'
+                        return 'Self-Evolve 仍在處理 — 重新整理頁面或稍後再看 Skill Timeline'
                       }
                       return '等候 Self-Evolve 完成 (polling 5s)'
                     })()}
