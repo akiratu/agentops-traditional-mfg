@@ -47,3 +47,17 @@ v2 在 Procedure Step 2 加了**「異常模式 → 優先工具」3-way 映射*
 - 政府計畫提案附件
 - 主管展示「我們已經在金屬加工 domain 跑通」的證據
 - v0.3 開發時的 dogfood 對象(新功能用這個 factory + agent 測試)
+- v0.5 UI demo seed 來源(`scripts/seed_metal_mfg_demo_for_ui.py`)
+
+## 2026-05-21 更新:內容語言全部 zh-TW
+
+原 2026-05-20 跑出來的 `04_trace_analysis.json` 中 `expected_outcome` / `actual_outcome` /
+`root_cause_summary` 是英文(Gemini Pro 預設語言)。Plan 5 UI 上線後做了 i18n,
+這份內容也同步改為繁體中文。
+
+- 同時把 `packages/agentops_core/services/trace_analyzer/prompts/system.txt` 加上
+  「Respond in Traditional Chinese」指令,以後跑 trace analyzer 直接出中文。
+- 英文原版在 git 歷史 `b0084b9` 之後可追,做為 LLM-prompt-language-default 的參考。
+- 一次 2026-05-21 Gemini Pro 驗證(signal `29f195ed`,finding `4da46677`)確認
+  prompt 改變後輸出完全是中文。本檔的 3-case 版本則由原英文直譯保留,
+  讓 demo 故事更完整。
