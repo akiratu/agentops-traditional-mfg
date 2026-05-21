@@ -5,17 +5,20 @@ const BACKEND = process.env.E2E_BACKEND_URL || 'http://localhost:8000'
 export type SeededIds = {
   factoryId: string
   agentId: string
+  agentName: string
   skillId: string
 }
 
 async function seedFactoryAgentSkill(): Promise<SeededIds> {
+  const stamp = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+  const agentName = `e2e-agent-${stamp}`
   const factory = await postJson(`${BACKEND}/factories`, {
-    name: `e2e-factory-${Date.now()}`,
+    name: `e2e-factory-${stamp}`,
     deployment_type: 'on_prem',
   })
   const agent = await postJson(`${BACKEND}/agents`, {
     factory_id: factory.id,
-    name: 'e2e-agent',
+    name: agentName,
     purpose: 'e2e test agent',
     runtime_status: 'running',
   })
@@ -27,13 +30,14 @@ async function seedFactoryAgentSkill(): Promise<SeededIds> {
     tool_specs: [],
     golden_test_cases: [],
     sop_source_set_id: `set-e2e-${Date.now()}`,
+    generated_by_run_id: `run-e2e-${Date.now()}`,
   })
   await postJson(
     `${BACKEND}/agents/${agent.id}/current-skill`,
     { current_skill_id: skill.id },
     'PATCH'
   )
-  return { factoryId: factory.id, agentId: agent.id, skillId: skill.id }
+  return { factoryId: factory.id, agentId: agent.id, agentName, skillId: skill.id }
 }
 
 async function postJson(

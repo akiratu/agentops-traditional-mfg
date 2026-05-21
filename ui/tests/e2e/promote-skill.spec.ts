@@ -12,8 +12,8 @@ test('promote skill: DRAFT v2 → ACTIVE, prior ACTIVE → ARCHIVED', async ({ p
   })
 
   await page.goto(`/skills/${seed.agentId}`)
-  await expect(page.getByText('v1')).toBeVisible()
-  await expect(page.getByText('v2')).toBeVisible()
+  await expect(page.getByLabel(/Select v1 for diff/)).toBeVisible()
+  await expect(page.getByLabel(/Select v2 for diff/)).toBeVisible()
 
   await page.getByTestId('promote-2').click()
   await expect(

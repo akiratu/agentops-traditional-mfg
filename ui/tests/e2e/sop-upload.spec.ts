@@ -12,7 +12,7 @@ test('SOP upload → /skill-generations → redirect to /skills/[agentId]', asyn
 
   await page.goto('/sop-upload')
   await page.getByRole('combobox').first().click()
-  await page.getByRole('option', { name: /e2e-agent/ }).click()
+  await page.getByRole('option', { name: new RegExp(seed.agentName) }).click()
 
   await page.getByTestId('sop-file-input').setInputFiles(tmpFile)
   await expect(page.getByText(/e2e-sop-/)).toBeVisible()
