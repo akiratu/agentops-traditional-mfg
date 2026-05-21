@@ -217,18 +217,156 @@ def main() -> None:
     )
     print(f"[3/3] SI 客服中心   factory={factory_svc['id'][:8]} agent={agent_svc['id'][:8]}")
 
+    # ----- Demo drama: add anomaly + finding for semi & customer service too,
+    # so all 3 domains have a story (not just "deployed, idle"). -----
+    semi_sig = post_json(
+        "/anomaly-signals",
+        {
+            "agent_id": agent_semi["id"],
+            "source_type": "metric_drift",
+            "related_trace_refs": ["semi-trace-yield-drop-001"],
+            "status": "resolved",
+        },
+    )
+    finding_semi = post_json(
+        "/rca-findings",
+        {
+            "anomaly_signal_id": semi_sig["id"],
+            "root_cause_summary": (
+                "技能缺口:Tester 機台 #3 良率突降至 78%(原 96%),Agent 只查了"
+                " MES 良率報表,沒呼叫 `query_tester_maintenance_log` 對照最近"
+                " 的 Tester 保養紀錄。SOP 5.3 指出 Bin 4 突升 + 單機台事件應"
+                "優先查 Tester 內部狀態,而非廠務或材料。"
+            ),
+            "evidence": {
+                "notebook": (
+                    "## 🔍 已查到什麼\n"
+                    "- [fetch_trace_detail] Tester-3 良率自昨日 22:00 突降至 78%。\n"
+                    "- [fetch_trace_detail] Bin 4 比例從 0.5% 拉升到 14%,屬於"
+                    " Probe Card 接觸不良的典型 fingerprint。\n"
+                    "- [fetch_skill_detail] Skill prompt 描述了通用 RCA 流程,"
+                    "但沒明列 SOP 5.3 的「Bin 4 突升 + 單機台」對應規則。\n\n"
+                    "## 💡 目前推論\n"
+                    "Agent 收到良率告警後直奔 MES 報表,沒有依「單機台 vs 全廠」"
+                    "二分流程先呼叫 `query_tester_maintenance_log` 看 Tester 內部"
+                    "保養 / Probe Card 更換時序。\n\n"
+                    "## ❓ 還需驗證\n"
+                    "(已足夠,可提交 failure case)\n\n"
+                    "## 🚫 已排除\n"
+                    "- 廠務問題:其他 Tester 都正常,單機台事件,排除。\n"
+                    "- 材料批次:同批 Wafer 在其他 Tester 良率正常,排除。"
+                ),
+                "failure_case_ids": ["bin4-spike-missed-tester-maintenance"],
+                "plan_steps_completed": 4,
+                "total_iterations": 7,
+                "termination": "terminated_by_submit",
+            },
+            "suggested_fix_type": "supplement_sop",
+            "suggested_fix_payload": {
+                "failure_cases": [
+                    {
+                        "id": "bin4-spike-missed-tester-maintenance",
+                        "query": (
+                            "Tester-3 從昨晚 22:00 開始良率掉到 78%,Bin 4 突"
+                            "升到 14%,其他 Tester 都正常"
+                        ),
+                        "expected_outcome": (
+                            "Agent 應辨識「單機台 + Bin 4 突升」是 Probe Card "
+                            "接觸不良典型徵兆,依 SOP 5.3 立即呼叫"
+                            " `query_tester_maintenance_log` 查最近的 Probe "
+                            "Card 更換 / 機台保養紀錄。"
+                        ),
+                        "actual_outcome": (
+                            "Agent 只呼叫了 `query_mes_yield_report` 確認良率"
+                            "確實掉了,然後就建議「請廠務檢查」。沒有切到"
+                            "「單機台優先查 Tester 內部」這條 SOP 5.3 規則。"
+                        ),
+                        "context": "trace_id=semi-trace-yield-drop-001; skill_version=1",
+                    }
+                ]
+            },
+            "confidence_score": 0.78,
+            "status": "proposed",
+        },
+    )
+    print(f"        ↪ semi finding={finding_semi['id'][:8]} (proposed)")
+
+    svc_sig = post_json(
+        "/anomaly-signals",
+        {
+            "agent_id": agent_svc["id"],
+            "source_type": "human_flag",
+            "related_trace_refs": ["svc-trace-p1-escalation-fail-042"],
+            "status": "resolved",
+        },
+    )
+    finding_svc = post_json(
+        "/rca-findings",
+        {
+            "anomaly_signal_id": svc_sig["id"],
+            "root_cause_summary": (
+                "技能缺口:客戶報修 ERP server 當機(P1),客服助理判定為 P2,"
+                "派工 SLA 從 2 小時拉長到 8 小時,造成出貨延誤。SOP 1 明列"
+                "「系統完全無法運作 / 影響營運」即為 P1,但 skill prompt 沒"
+                "明確示範這個對應。"
+            ),
+            "evidence": {
+                "notebook": (
+                    "## 🔍 已查到什麼\n"
+                    "- [fetch_trace_detail] 客戶來電原話: 「ERP server 整個"
+                    "當掉,出貨單沒辦法開」。\n"
+                    "- [fetch_trace_detail] Agent 在判定階段選擇 P2(部分功能"
+                    "異常但可繞行),理由為「客戶可手動開單」。\n"
+                    "- [fetch_skill_detail] Skill prompt 對 P1/P2/P3 描述清楚"
+                    "但沒列舉「ERP / MES / 出貨」這類核心系統屬於 P1 的範例。\n\n"
+                    "## 💡 目前推論\n"
+                    "Agent 太字面解讀「可繞行」三個字,沒考慮業務影響。SOP 1 的"
+                    "P1 定義其實是「影響營運」,任何擋住出貨的當機都該是 P1。\n\n"
+                    "## ❓ 還需驗證\n"
+                    "(已足夠)\n\n"
+                    "## 🚫 已排除\n"
+                    "- 工程師資源不足:當下有空閒專長工程師可派,排除。"
+                ),
+                "failure_case_ids": ["p1-misclassified-as-p2"],
+                "plan_steps_completed": 3,
+                "total_iterations": 5,
+                "termination": "terminated_by_submit",
+            },
+            "suggested_fix_type": "supplement_sop",
+            "suggested_fix_payload": {
+                "failure_cases": [
+                    {
+                        "id": "p1-misclassified-as-p2",
+                        "query": "ERP server 整個當掉,出貨單沒辦法開",
+                        "expected_outcome": (
+                            "Agent 應辨識「ERP / MES / 出貨」為核心營運系統,"
+                            "依 SOP 1 的「影響營運」判準直接歸 P1(2 小時 SLA)。"
+                        ),
+                        "actual_outcome": (
+                            "Agent 字面解讀「可手動繞行」就降級為 P2(8 小時"
+                            " SLA),造成出貨延誤。"
+                        ),
+                        "context": "trace_id=svc-trace-p1-escalation-fail-042; skill_version=1",
+                    }
+                ]
+            },
+            "confidence_score": 0.82,
+            "status": "proposed",
+        },
+    )
+    print(f"        ↪ service finding={finding_svc['id'][:8]} (proposed)")
+
     # ----- Summary -----
     ui = "http://localhost:3001"
     print("\n=== Ready to demo ===\n")
-    print(f"打開 {ui}/factories 看到 3 個 factory:")
+    print(f"打開 {ui}/factories 看到 3 個 factory,各有自己的 finding 故事:")
     print(f"  1. ACME Metals(金屬加工)— Plan C 主場域")
-    print(f"     ↪ 含完整 RCA finding,可按 Accept 觸發 Self-Evolve")
-    print(f"     {ui}/findings/{finding_metal['id']}")
-    print(f"  2. XX 半導體封測 — Plan B 技術整合")
-    print(f"     {ui}/agents/{agent_semi['id']}")
-    print(f"  3. SI 客服中心   — Plan A 技術整合")
-    print(f"     {ui}/agents/{agent_svc['id']}")
-    print(f"\n3 個場域 / 3 個 agent / 3 套不同 skill,跑在同一個 AgentOps 平台上。")
+    print(f"     finding: {ui}/findings/{finding_metal['id']}")
+    print(f"  2. XX 半導體封測   — Plan B 技術整合")
+    print(f"     finding: {ui}/findings/{finding_semi['id']}")
+    print(f"  3. SI 客服中心     — Plan A 技術整合")
+    print(f"     finding: {ui}/findings/{finding_svc['id']}")
+    print(f"\n3 個場域 / 3 個 agent / 3 套不同 skill / 3 個正在等主管 Accept 的 finding。")
 
 
 if __name__ == "__main__":
