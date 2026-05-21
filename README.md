@@ -41,6 +41,14 @@ uvicorn agentops_core.main:app --reload --port 8000
 pytest
 ```
 
+## UI (v0.5+)
+
+```bash
+cd ui && pnpm install && pnpm dev    # http://localhost:3001
+```
+
+See [`ui/README.md`](ui/README.md). Spec: [`docs/superpowers/specs/2026-05-21-agentops-ui-v0.5-design.md`](docs/superpowers/specs/2026-05-21-agentops-ui-v0.5-design.md).
+
 ## URLs after `docker compose up`
 
 | Service | URL |
