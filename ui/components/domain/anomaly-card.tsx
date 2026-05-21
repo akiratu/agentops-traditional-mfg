@@ -11,7 +11,13 @@ import { qk } from '@/lib/query-keys'
 import { relativeTime, shortId } from '@/lib/format'
 import type { AnomalySignalRead } from '@/lib/types'
 
-export function AnomalyCard({ signal }: { signal: AnomalySignalRead }) {
+type AnomalyCardProps = {
+  signal: AnomalySignalRead
+  /** Human-readable label like "CNC RCA Agent · ACME Metals(金屬加工)". */
+  agentLabel?: string
+}
+
+export function AnomalyCard({ signal, agentLabel }: AnomalyCardProps) {
   // Look up the first finding (if any) so we can show its confidence.
   const findingsQ = useQuery({
     queryKey: qk.findings(signal.id),
@@ -36,8 +42,11 @@ export function AnomalyCard({ signal }: { signal: AnomalySignalRead }) {
             <StatusBadge status={signal.status} />
             {firstFinding && <ConfidenceBadge value={firstFinding.confidence_score} />}
           </div>
-          <div className="truncate text-xs text-muted-foreground">
-            Agent {shortId(signal.agent_id)} · {signal.related_trace_refs.length} traces
+          <div className="truncate text-xs">
+            <span className="font-medium text-foreground">
+              {agentLabel ?? `Agent ${shortId(signal.agent_id)}`}
+            </span>
+            <span className="text-muted-foreground"> · {signal.related_trace_refs.length} traces</span>
           </div>
         </div>
         <div className="text-xs text-muted-foreground">{relativeTime(signal.created_at)}</div>

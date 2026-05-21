@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { AnomalyCard } from '@/components/domain/anomaly-card'
 import { AnomalyFilters } from '@/components/domain/anomaly-filters'
@@ -26,6 +26,23 @@ export default function AnomalyFeedPage() {
       }),
   })
 
+  // Resolve agent → factory labels so cards can show "Agent (Factory)" instead
+  // of just an 8-char UUID prefix. Two queries (factories + agents) are cheap
+  // and shared across all card renders.
+  const agentsQ = useQuery({ queryKey: qk.agents(), queryFn: () => api.listAgents() })
+  const factoriesQ = useQuery({
+    queryKey: qk.factories(),
+    queryFn: () => api.listFactories(),
+  })
+
+  const agentLabelMap = useMemo(() => {
+    if (!agentsQ.data || !factoriesQ.data) return new Map<string, string>()
+    const factoryById = new Map(factoriesQ.data.map((f) => [f.id, f.name]))
+    return new Map(
+      agentsQ.data.map((a) => [a.id, `${a.name} · ${factoryById.get(a.factory_id) ?? '—'}`])
+    )
+  }, [agentsQ.data, factoriesQ.data])
+
   return (
     <div className="flex flex-col gap-4">
       <BreadcrumbNav crumbs={[{ label: 'Anomalies' }]} />
@@ -39,7 +56,11 @@ export default function AnomalyFeedPage() {
             {[...signals]
               .sort((a, b) => b.created_at.localeCompare(a.created_at))
               .map((s) => (
-                <AnomalyCard key={s.id} signal={s} />
+                <AnomalyCard
+                  key={s.id}
+                  signal={s}
+                  agentLabel={agentLabelMap.get(s.agent_id)}
+                />
               ))}
           </div>
         )}
