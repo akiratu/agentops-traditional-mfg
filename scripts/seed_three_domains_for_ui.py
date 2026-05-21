@@ -38,9 +38,7 @@ BACKEND = os.environ.get("BACKEND", "http://localhost:8000")
 REPO = Path(__file__).resolve().parent.parent
 METAL_ASSETS = REPO / "docs/demo-assets/metal-mfg-rca-2026-05-20"
 SEMI_ASSETS = REPO / "docs/demo-assets/semiconductor-rca-2026-05-19"
-SERVICE_SOP = (
-    REPO / "packages/flows2agents/tests/fixtures/service-portfolio/mini-sop.md"
-)
+SERVICE_ASSETS = REPO / "docs/demo-assets/customer-service-2026-05-21"
 
 
 def post_json(path: str, body: dict, method: str = "POST") -> dict:
@@ -167,53 +165,18 @@ def main() -> None:
     print(f"[2/3] XX 半導體封測 factory={factory_semi['id'][:8]} agent={agent_semi['id'][:8]}")
 
     # ----- 3) Customer service (Plan A technology integrated) -----
-    service_sop = SERVICE_SOP.read_text()
-    service_skill_payload = {
-        "prompt": (
-            "# 客服維修流程助理\n\n"
-            "協助系統整合公司客服中心受理、派工、處理、結案的全流程,確保 P1/P2/P3 工單依正確 SLA 推進。\n\n"
-            "## Triggers\n"
-            "- 客戶來電報修,請建工單\n"
-            "- 工單派發給誰?\n"
-            "- 工程師到場後該做什麼?\n"
-            "- 維修完成,要怎麼結案?\n\n"
-            "## Procedure\n\n"
-            "### 1. 報修受理\n"
-            "詢問客戶名稱、聯絡方式、設備型號、故障現象、緊急程度。依下列標準分級:\n"
-            "- P1: 系統完全無法運作,影響營運(2 小時內到場)\n"
-            "- P2: 部分功能異常但可繞行(8 小時內到場)\n"
-            "- P3: 一般故障,可排程處理(48 小時內到場)\n\n"
-            "### 2. 工單派發\n"
-            "依故障類型對應專長工程師,考量工程師工作量,P1 優先派發。\n\n"
-            "### 3. 現場處理\n"
-            "工程師到場依序執行:確認故障現象 → 初步診斷 → 執行修復或更換零件 → 測試恢復狀況。\n"
-            "可隨時查閱知識庫或回報技術支援。\n\n"
-            "### 4. 結案紀錄\n"
-            "工單需填:故障原因、處理方式、使用零件、客戶簽認。\n\n"
-            "## 工具\n"
-            "- query_customer_history(customer_id) — 查詢客戶歷史案件\n"
-            "- query_knowledge_base(symptom) — 查知識庫類似故障\n"
-            "- assign_engineer(ticket_id, priority) — 派工\n"
-            "- close_ticket(ticket_id, root_cause, fix) — 結案"
-        ),
-        "tool_specs": [],
-        "golden_test_cases": [
-            {
-                "id": "p1-server-down",
-                "query": "客戶機房 ERP server 完全當機,影響整廠出貨",
-                "expected": "判定 P1 → 2 小時內派專長工程師",
-            }
-        ],
-        "sop_source_set_id": "set-si-customer-service",
-        "generated_by_run_id": "run-si-customer-service-v1",
-    }
+    # Load the customer-service skill from a real flows2agents mining run.
+    # The run_id points to existing storage at data/skills/f2a-1f9d7cceac7b/
+    # servicecenterflow/ so Self-Evolve can load the IR and produce v2 when
+    # the user accepts the corresponding finding.
+    service_skill = json.loads((SERVICE_ASSETS / "03_skill_v1.json").read_text())
     factory_svc, agent_svc, skill_svc = seed_factory_agent_skill(
         factory_name="SI 客服中心",
         deployment_type="private_cloud",
         kpi_targets={"p1_sla_meet_pct": 99.0, "csat_score_min": 4.5},
         agent_name="客服維修助理",
         agent_purpose="客服中心受理 / 派工 / 結案全流程助理,確保 P1/P2/P3 SLA 達標",
-        skill_payload=service_skill_payload,
+        skill_payload=service_skill,
     )
     print(f"[3/3] SI 客服中心   factory={factory_svc['id'][:8]} agent={agent_svc['id'][:8]}")
 
