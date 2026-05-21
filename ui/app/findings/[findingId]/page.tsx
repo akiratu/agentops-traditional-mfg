@@ -42,17 +42,10 @@ export default function FindingDetailPage({
     },
   })
 
-  // Look up parent anomaly signal for agent_id (no GET /anomaly-signals/{id} on backend, so list+filter)
   const signalQ = useQuery({
-    queryKey: ['anomaly-signals', 'lookup', findingQ.data?.anomaly_signal_id],
+    queryKey: ['anomaly-signals', findingQ.data?.anomaly_signal_id],
     enabled: !!findingQ.data,
-    queryFn: async () => {
-      const id = findingQ.data!.anomaly_signal_id
-      const all = await api.listAnomalySignals({})
-      const found = all.find((s) => s.id === id)
-      if (!found) throw new Error('Anomaly signal not found')
-      return found
-    },
+    queryFn: () => api.getAnomalySignal(findingQ.data!.anomaly_signal_id),
   })
 
   const agentId = signalQ.data?.agent_id

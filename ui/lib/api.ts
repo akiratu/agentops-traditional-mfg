@@ -106,10 +106,12 @@ export const api = {
   /**
    * GET /anomaly-signals — backend currently only filters by agent_id.
    * For source_type / status filtering, fetch and filter client-side
-   * (see app/anomalies/page.tsx in Task 7).
+   * (see app/anomalies/page.tsx).
    */
   listAnomalySignals: (filter: { agent_id?: UUID } = {}) =>
     http<AnomalySignalRead[]>(`/anomaly-signals${qs(filter)}`),
+  getAnomalySignal: (id: UUID) =>
+    http<AnomalySignalRead>(`/anomaly-signals/${id}`),
 
   // findings
   getFinding: (id: UUID) => http<RCAFindingRead>(`/rca-findings/${id}`),

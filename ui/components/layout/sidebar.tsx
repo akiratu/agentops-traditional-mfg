@@ -29,7 +29,7 @@ const drillDownHints = [
 export function Sidebar() {
   const pathname = usePathname()
   return (
-    <aside className="w-56 shrink-0 border-r border-zinc-200 bg-zinc-50 px-3 py-4 dark:border-zinc-800 dark:bg-zinc-950">
+    <aside className="w-56 shrink-0 border-r border-border bg-muted/40 px-3 py-4">
       <div className="mb-4 px-2 text-base font-semibold">AgentOps</div>
       <nav className="flex flex-col gap-0.5" aria-label="Primary">
         {items.map((it) => {
@@ -42,8 +42,8 @@ export function Sidebar() {
               className={cn(
                 'flex items-center gap-2 rounded px-2 py-1.5 text-sm transition-colors',
                 isActive
-                  ? 'bg-zinc-200 font-medium text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100'
-                  : 'text-zinc-700 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-900'
+                  ? 'bg-accent font-medium text-accent-foreground'
+                  : 'text-muted-foreground hover:bg-muted hover:text-foreground'
               )}
             >
               <Icon size={16} aria-hidden />
@@ -53,7 +53,7 @@ export function Sidebar() {
         })}
       </nav>
 
-      <div className="mt-6 px-2 text-[11px] font-medium uppercase tracking-wide text-zinc-500">
+      <div className="mt-6 px-2 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
         Drill-down only
       </div>
       <div className="mt-1 flex flex-col gap-0.5">
@@ -62,9 +62,7 @@ export function Sidebar() {
           return (
             <div
               key={it.href}
-              role="note"
-              aria-disabled="true"
-              className="flex cursor-not-allowed items-center gap-2 px-2 py-1.5 text-sm text-zinc-400"
+              className="flex cursor-not-allowed items-center gap-2 px-2 py-1.5 text-sm text-muted-foreground opacity-60"
               title="Reachable from parent page"
             >
               <Icon size={16} aria-hidden />

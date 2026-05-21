@@ -23,7 +23,7 @@ export function DataState<T>({
 }: DataStateProps<T>) {
   if (query.isPending) {
     return (
-      <div className="flex items-center gap-2 p-card text-zinc-500" role="status">
+      <div className="flex items-center gap-2 p-card text-muted-foreground" role="status">
         {loading ?? (
           <>
             <Loader2 className="animate-spin" size={16} />
@@ -39,7 +39,7 @@ export function DataState<T>({
     }
     const msg = query.error instanceof Error ? query.error.message : 'Unknown error'
     return (
-      <div className="flex items-start gap-2 p-card text-red-700 dark:text-red-400" role="alert">
+      <div className="flex items-start gap-2 p-card text-destructive" role="alert">
         {error ? (
           error(query.error, retry)
         ) : (
@@ -49,7 +49,7 @@ export function DataState<T>({
               <div className="font-medium">Failed to load: {msg}</div>
               <button
                 onClick={retry}
-                className="mt-1 text-xs underline hover:text-red-900"
+                className="mt-1 text-xs underline hover:opacity-80"
                 type="button"
               >
                 Retry
@@ -63,7 +63,7 @@ export function DataState<T>({
   const data = query.data as T
   if (isEmpty?.(data)) {
     return (
-      <div className="flex items-center gap-2 p-card text-zinc-500">
+      <div className="flex items-center gap-2 p-card text-muted-foreground">
         {empty ?? (
           <>
             <Inbox size={16} />
