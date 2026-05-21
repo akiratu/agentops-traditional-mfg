@@ -13,7 +13,7 @@ export function SkillDiff({ oldPrompt, newPrompt, oldLabel, newLabel }: Props) {
   if (oldPrompt === newPrompt) {
     return (
       <p data-testid="skill-diff-empty" className="p-card text-xs text-muted-foreground">
-        Both versions have identical prompts.
+        兩版 prompt 內容相同
       </p>
     )
   }
@@ -22,8 +22,8 @@ export function SkillDiff({ oldPrompt, newPrompt, oldLabel, newLabel }: Props) {
       <ReactDiffViewer
         oldValue={oldPrompt}
         newValue={newPrompt}
-        leftTitle={oldLabel ?? 'older'}
-        rightTitle={newLabel ?? 'newer'}
+        leftTitle={oldLabel ?? '舊版'}
+        rightTitle={newLabel ?? '新版'}
         splitView
         compareMethod={DiffMethod.WORDS}
         useDarkTheme={false}

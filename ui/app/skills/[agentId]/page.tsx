@@ -55,7 +55,7 @@ export default function SkillTimelinePage({
           { label: 'Skills' },
         ]}
       />
-      <h1 className="text-xl font-semibold">Skill Timeline</h1>
+      <h1 className="text-xl font-semibold">技能版本演進 Skill Timeline</h1>
       <DataState query={skillsQ} isEmpty={(d) => d.length === 0}>
         {(skills) => (
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-[360px_1fr]">
@@ -67,7 +67,7 @@ export default function SkillTimelinePage({
             />
             <div className="rounded border border-border">
               <div className="border-b border-border px-3 py-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Diff {older && newer ? `v${older.version} → v${newer.version}` : '(select 2 versions)'}
+                差異 Diff {older && newer ? `v${older.version} → v${newer.version}` : '(請勾選 2 版)'}
               </div>
               {older && newer ? (
                 <SkillDiff
@@ -78,7 +78,7 @@ export default function SkillTimelinePage({
                 />
               ) : (
                 <p className="p-card text-xs text-muted-foreground">
-                  Tick the checkbox on two versions on the left to compare.
+                  勾選左側兩版進行比對
                 </p>
               )}
             </div>

@@ -14,16 +14,16 @@ import {
 import { cn } from '@/lib/utils'
 
 const items = [
-  { href: '/factories', label: 'Factories', icon: Factory },
-  { href: '/anomalies', label: 'Anomalies', icon: AlertTriangle },
-  { href: '/regression-runs', label: 'Regression Runs', icon: GitCompare },
-  { href: '/sop-upload', label: 'SOP Upload', icon: FileUp },
+  { href: '/factories', label: '工廠 Factories', icon: Factory },
+  { href: '/anomalies', label: '異常 Anomalies', icon: AlertTriangle },
+  { href: '/regression-runs', label: '回歸測試 Regression Runs', icon: GitCompare },
+  { href: '/sop-upload', label: 'SOP 上傳', icon: FileUp },
 ] as const
 
 const drillDownHints = [
-  { href: '/agents', label: 'Agents (via Factory)', icon: Bot },
-  { href: '/skills', label: 'Skills (via Agent)', icon: Workflow },
-  { href: '/findings', label: 'Findings (via Anomaly)', icon: ListChecks },
+  { href: '/agents', label: 'Agent(從工廠進入)', icon: Bot },
+  { href: '/skills', label: 'Skill(從 Agent 進入)', icon: Workflow },
+  { href: '/findings', label: 'Finding(從異常進入)', icon: ListChecks },
 ] as const
 
 export function Sidebar() {
@@ -54,7 +54,7 @@ export function Sidebar() {
       </nav>
 
       <div className="mt-6 px-2 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-        Drill-down only
+        下層需從上層進入
       </div>
       <div className="mt-1 flex flex-col gap-0.5">
         {drillDownHints.map((it) => {
@@ -63,11 +63,11 @@ export function Sidebar() {
             <div
               key={it.href}
               className="flex cursor-not-allowed items-center gap-2 px-2 py-1.5 text-sm text-muted-foreground opacity-60"
-              title="Reachable from parent page"
+              title="從上層頁面進入"
             >
               <Icon size={16} aria-hidden />
               <span>{it.label}</span>
-              <span className="sr-only"> — reachable only from parent page</span>
+              <span className="sr-only"> — 僅能從上層頁面進入</span>
             </div>
           )
         })}

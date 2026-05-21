@@ -24,9 +24,9 @@ export function SkillTimeline({ agentId, skills, selectedIds, onToggle }: Props)
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: qk.skills(agentId) })
       void qc.invalidateQueries({ queryKey: qk.agent(agentId) })
-      toast.success('Promoted to ACTIVE — prior active will archive shortly')
+      toast.success('已升為 ACTIVE — 原 active 即將歸檔')
     },
-    onError: (err) => toast.error(`Promote failed: ${(err as Error).message}`),
+    onError: (err) => toast.error(`升級失敗: ${(err as Error).message}`),
   })
 
   return (
@@ -60,7 +60,7 @@ export function SkillTimeline({ agentId, skills, selectedIds, onToggle }: Props)
                   <span className="text-sm font-medium">v{s.version}</span>
                   <StatusBadge status={s.status} />
                   {s.status === 'active' && (
-                    <span className="text-[11px] font-medium text-green-700">current</span>
+                    <span className="text-[11px] font-medium text-green-700">目前 current</span>
                   )}
                 </div>
                 <div className="flex items-center gap-2">
@@ -76,13 +76,13 @@ export function SkillTimeline({ agentId, skills, selectedIds, onToggle }: Props)
                       disabled={promote.isPending}
                       data-testid={`promote-${s.version}`}
                     >
-                      Promote to ACTIVE
+                      升為 ACTIVE
                     </Button>
                   )}
                 </div>
               </div>
               <div className="text-[11px] text-muted-foreground">
-                set: {s.sop_source_set_id} · run: {s.generated_by_run_id ?? '—'}
+                資料集: {s.sop_source_set_id} · 執行 ID: {s.generated_by_run_id ?? '—'}
               </div>
               <pre className="line-clamp-2 whitespace-pre-wrap text-[11px] text-muted-foreground">
                 {s.prompt.slice(0, 160)}

@@ -27,7 +27,7 @@ export function DataState<T>({
         {loading ?? (
           <>
             <Loader2 className="animate-spin" size={16} />
-            Loading…
+            載入中…
           </>
         )}
       </div>
@@ -46,13 +46,13 @@ export function DataState<T>({
           <>
             <AlertCircle size={16} className="mt-0.5" />
             <div>
-              <div className="font-medium">Failed to load: {msg}</div>
+              <div className="font-medium">載入失敗: {msg}</div>
               <button
                 onClick={retry}
                 className="mt-1 text-xs underline hover:opacity-80"
                 type="button"
               >
-                Retry
+                重試
               </button>
             </div>
           </>
@@ -67,7 +67,7 @@ export function DataState<T>({
         {empty ?? (
           <>
             <Inbox size={16} />
-            No data yet.
+            尚無資料
           </>
         )}
       </div>

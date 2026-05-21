@@ -60,9 +60,9 @@ export function SopDropzone({
         )}
       >
         <Upload size={20} className="text-muted-foreground" />
-        <p>Drag SOP files here, or click to select</p>
+        <p>拖放 SOP 檔案至此,或點擊選擇</p>
         <label className="cursor-pointer text-primary underline-offset-4 hover:underline">
-          Choose files
+          選擇檔案
           <input
             type="file"
             multiple

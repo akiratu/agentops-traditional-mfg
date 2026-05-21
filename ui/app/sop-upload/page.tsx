@@ -23,8 +23,8 @@ export default function SopUploadPage() {
 
   const submit = useMutation({
     mutationFn: async () => {
-      if (!selectedAgent) throw new Error('Select an agent first')
-      if (files.length === 0) throw new Error('Attach at least one SOP file')
+      if (!selectedAgent) throw new Error('請先選擇 Agent')
+      if (files.length === 0) throw new Error('請至少附一個 SOP 檔案')
       const uploaded = await Promise.all(
         files.map(({ file }) =>
           api.uploadSOP(selectedAgent.factory_id, file, inferType(file.name))
@@ -38,7 +38,7 @@ export default function SopUploadPage() {
       return skill
     },
     onSuccess: (skill) => {
-      toast.success(`Skill v${skill.version} generated`)
+      toast.success(`已產生 Skill v${skill.version}`)
       router.push(`/skills/${skill.agent_id}`)
     },
     onError: (err) => toast.error((err as Error).message),
@@ -47,15 +47,15 @@ export default function SopUploadPage() {
   return (
     <div className="flex max-w-2xl flex-col gap-4">
       <BreadcrumbNav crumbs={[{ label: 'SOP Upload' }]} />
-      <h1 className="text-xl font-semibold">Upload SOPs → Generate Skill</h1>
+      <h1 className="text-xl font-semibold">上傳 SOP 產生技能 Upload SOPs</h1>
 
       <section>
         <label className="mb-1 block text-xs font-medium uppercase text-muted-foreground">
-          Step 1: Pick Agent
+          步驟 1: 選擇 Agent
         </label>
         <Select value={agentId} onValueChange={(v) => setAgentId(v as UUID)}>
           <SelectTrigger className="h-8 text-xs">
-            <SelectValue placeholder="Select an agent" />
+            <SelectValue placeholder="選擇一個 Agent" />
           </SelectTrigger>
           <SelectContent>
             {agentsQ.data?.map((a) => (
@@ -69,14 +69,14 @@ export default function SopUploadPage() {
 
       <section>
         <label className="mb-1 block text-xs font-medium uppercase text-muted-foreground">
-          Step 2: SOP files
+          步驟 2: SOP 檔案
         </label>
         <SopDropzone files={files} onChange={setFiles} disabled={submit.isPending} />
       </section>
 
       <section>
         <label className="mb-1 block text-xs font-medium uppercase text-muted-foreground">
-          Step 3: Strategy
+          步驟 3: 產生策略
         </label>
         <div className="flex items-center gap-4 text-xs">
           <label className="flex items-center gap-2">
@@ -87,7 +87,7 @@ export default function SopUploadPage() {
               disabled={submit.isPending}
             />
             <span>
-              Mining <span className="text-muted-foreground">(recommended, traceable)</span>
+              Mining 探勘 <span className="text-muted-foreground">(推薦,可追溯)</span>
             </span>
           </label>
           <label className="flex items-center gap-2">
@@ -97,7 +97,7 @@ export default function SopUploadPage() {
               onChange={() => setStrategy('single')}
               disabled={submit.isPending}
             />
-            <span>Single</span>
+            <span>Single 單次</span>
           </label>
         </div>
       </section>
@@ -109,7 +109,7 @@ export default function SopUploadPage() {
           disabled={submit.isPending || !agentId || files.length === 0}
           data-testid="sop-submit"
         >
-          {submit.isPending ? 'Generating… (1–3 min)' : 'Upload + Generate Skill'}
+          {submit.isPending ? '產生中… (1-3 分鐘)' : '上傳並產生技能'}
         </Button>
       </div>
     </div>

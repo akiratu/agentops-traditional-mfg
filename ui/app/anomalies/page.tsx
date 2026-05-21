@@ -30,7 +30,7 @@ export default function AnomalyFeedPage() {
     <div className="flex flex-col gap-4">
       <BreadcrumbNav crumbs={[{ label: 'Anomalies' }]} />
       <div className="flex items-end justify-between gap-4">
-        <h1 className="text-xl font-semibold">Anomaly Feed</h1>
+        <h1 className="text-xl font-semibold">異常列表 Anomaly Feed</h1>
         <AnomalyFilters value={filters} onChange={setFilters} />
       </div>
       <DataState query={query} isEmpty={(d) => !d || d.length === 0}>

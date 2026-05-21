@@ -19,7 +19,7 @@ export default function FactoriesPage() {
   return (
     <div className="flex flex-col gap-4">
       <BreadcrumbNav crumbs={[{ label: 'Factories' }]} />
-      <h1 className="text-xl font-semibold">Factories</h1>
+      <h1 className="text-xl font-semibold">工廠 Factories</h1>
       <DataState query={query} isEmpty={(d) => d.length === 0}>
         {(factories) => (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -36,8 +36,8 @@ export default function FactoriesPage() {
                   </CardHeader>
                   <CardContent className="p-card pt-0 text-xs text-muted-foreground">
                     {f.kpi_targets && Object.keys(f.kpi_targets).length > 0
-                      ? `${Object.keys(f.kpi_targets).length} KPI targets`
-                      : 'No KPI targets'}
+                      ? `${Object.keys(f.kpi_targets).length} 個 KPI 目標`
+                      : '無 KPI 目標'}
                   </CardContent>
                 </Card>
               </Link>

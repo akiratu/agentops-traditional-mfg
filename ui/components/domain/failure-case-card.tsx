@@ -21,26 +21,26 @@ export function FailureCaseCard({
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground"
           >
-            View trace in Langfuse <ExternalLink size={10} aria-hidden />
+            到 Langfuse 看 trace <ExternalLink size={10} aria-hidden />
           </a>
         )}
       </div>
       <dl className="flex flex-col gap-1.5 text-[11px] leading-snug">
         <div>
-          <dt className="font-semibold text-muted-foreground">Query</dt>
+          <dt className="font-semibold text-muted-foreground">Query 查詢</dt>
           <dd>{fc.query}</dd>
         </div>
         <div>
-          <dt className="font-semibold text-green-700 dark:text-green-400">Expected</dt>
+          <dt className="font-semibold text-green-700 dark:text-green-400">Expected 應為</dt>
           <dd>{fc.expected_outcome}</dd>
         </div>
         <div>
-          <dt className="font-semibold text-red-700 dark:text-red-400">Actual</dt>
+          <dt className="font-semibold text-red-700 dark:text-red-400">Actual 實際</dt>
           <dd>{fc.actual_outcome}</dd>
         </div>
         {fc.context && (
           <div>
-            <dt className="font-semibold text-muted-foreground">Context</dt>
+            <dt className="font-semibold text-muted-foreground">Context 情境</dt>
             <dd className="text-muted-foreground">{fc.context}</dd>
           </div>
         )}

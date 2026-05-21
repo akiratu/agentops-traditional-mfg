@@ -85,17 +85,17 @@ export default function FindingDetailPage({
     mutationFn: () => api.patchFindingStatus(findingId, { status: 'accepted' }),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: qk.finding(findingId) })
-      toast.success('Accepted — Self-Evolve 已啟動,~4 分鐘後完成')
+      toast.success('已接受 — Self-Evolve 啟動,約 4 分鐘完成')
     },
-    onError: (err) => toast.error(`Accept failed: ${(err as Error).message}`),
+    onError: (err) => toast.error(`接受失敗: ${(err as Error).message}`),
   })
   const rejectM = useMutation({
     mutationFn: () => api.patchFindingStatus(findingId, { status: 'rejected' }),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: qk.finding(findingId) })
-      toast.message('Rejected')
+      toast.message('已拒絕')
     },
-    onError: (err) => toast.error(`Reject failed: ${(err as Error).message}`),
+    onError: (err) => toast.error(`拒絕失敗: ${(err as Error).message}`),
   })
 
   return (
@@ -116,7 +116,7 @@ export default function FindingDetailPage({
                   {signalQ.data && <SourceTypeBadge type={signalQ.data.source_type} />}
                   <ConfidenceBadge value={f.confidence_score} />
                   <span className="text-xs text-muted-foreground">
-                    Anomaly {shortId(f.anomaly_signal_id)} · {relativeTime(f.created_at)}
+                    異常訊號 {shortId(f.anomaly_signal_id)} · {relativeTime(f.created_at)}
                   </span>
                 </div>
                 <h1 className="text-base font-semibold leading-snug">
@@ -126,27 +126,27 @@ export default function FindingDetailPage({
 
               <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_320px]">
                 <section className="flex flex-col gap-3">
-                  <h2 className="text-sm font-medium">📓 Notebook</h2>
+                  <h2 className="text-sm font-medium">📓 推理筆記 Notebook</h2>
                   <NotebookViewer markdown={f.evidence.notebook ?? ''} />
                   <div className="text-[11px] text-muted-foreground">
                     {f.evidence.plan_steps_completed != null && (
-                      <>plan steps: {f.evidence.plan_steps_completed} · </>
+                      <>計畫步數: {f.evidence.plan_steps_completed} · </>
                     )}
                     {f.evidence.total_iterations != null && (
-                      <>iterations: {f.evidence.total_iterations} · </>
+                      <>迭代次數: {f.evidence.total_iterations} · </>
                     )}
-                    {f.evidence.termination && <>termination: {f.evidence.termination}</>}
+                    {f.evidence.termination && <>終止原因: {f.evidence.termination}</>}
                   </div>
                 </section>
 
                 <aside className="flex flex-col gap-3">
-                  <h2 className="text-sm font-medium">⚠️ {failures.length} Failure Cases</h2>
+                  <h2 className="text-sm font-medium">⚠️ {failures.length} 失敗案例</h2>
                   <div className="flex flex-col gap-2">
                     {failures.map((fc) => (
                       <FailureCaseCard key={fc.id} failureCase={fc} />
                     ))}
                     {failures.length === 0 && (
-                      <p className="text-xs text-muted-foreground">No failure cases recorded.</p>
+                      <p className="text-xs text-muted-foreground">無記錄失敗案例</p>
                     )}
                   </div>
                   <DecisionPanel

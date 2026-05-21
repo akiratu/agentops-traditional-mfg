@@ -45,25 +45,25 @@ export default function FactoryDetailPage({
               </CardTitle>
             </CardHeader>
             <CardContent className="p-card pt-0 text-xs text-muted-foreground">
-              <div>Langfuse: {f.langfuse_endpoint ?? '—'}</div>
-              <div>Project: {f.langfuse_project_id ?? '—'}</div>
-              <div>Updated: {relativeTime(f.updated_at)}</div>
+              <div>Langfuse 端點: {f.langfuse_endpoint ?? '—'}</div>
+              <div>專案: {f.langfuse_project_id ?? '—'}</div>
+              <div>更新時間: {relativeTime(f.updated_at)}</div>
             </CardContent>
           </Card>
         )}
       </DataState>
 
-      <h2 className="mt-2 text-sm font-medium">Agents</h2>
+      <h2 className="mt-2 text-sm font-medium">Agent 清單</h2>
       <DataState query={agentsQ} isEmpty={(d) => d.length === 0}>
         {(agents) => (
           <Table>
             <TableHeader>
               <TableRow className="h-9">
-                <TableHead>Name</TableHead>
-                <TableHead>Purpose</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Current Skill</TableHead>
-                <TableHead>Updated</TableHead>
+                <TableHead>名稱</TableHead>
+                <TableHead>用途</TableHead>
+                <TableHead>狀態</TableHead>
+                <TableHead>當前 Skill</TableHead>
+                <TableHead>更新時間</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

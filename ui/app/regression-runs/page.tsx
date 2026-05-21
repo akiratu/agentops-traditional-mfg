@@ -16,7 +16,7 @@ export default function RegressionRunsPage() {
   return (
     <div className="flex flex-col gap-4">
       <BreadcrumbNav crumbs={[{ label: 'Regression Runs' }]} />
-      <h1 className="text-xl font-semibold">Regression Runs</h1>
+      <h1 className="text-xl font-semibold">回歸測試 Regression Runs</h1>
       <DataState query={query} isEmpty={(d) => d.length === 0}>
         {(runs) => (
           <div className="flex flex-col gap-2">

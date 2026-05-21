@@ -14,6 +14,6 @@ test('browse: factories → agent → anomaly feed shows seeded signal', async (
   await expect(page.getByText('e2e-agent')).toBeVisible()
   await page.getByRole('link', { name: 'e2e-agent' }).click()
 
-  await page.getByRole('link', { name: /View all anomalies/ }).click()
+  await page.getByRole('link', { name: /View all anomalies|看全部異常/ }).click()
   await expect(page.getByTestId('anomaly-list').locator('> *')).not.toHaveCount(0)
 })

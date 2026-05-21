@@ -42,7 +42,7 @@ export function RegressionRow({ run }: { run: RegressionRunRead }) {
             {shortId(run.skill_id_old, 6)} → {shortId(run.skill_id_new, 6)}
           </span>
           <span className="text-muted-foreground">
-            {run.pass_count}/{run.test_case_count} pass · {run.fail_count} fail · strategy{' '}
+            通過 {run.pass_count}/{run.test_case_count} · 失敗 {run.fail_count} · 策略{' '}
             {run.test_set_strategy}
           </span>
         </div>
@@ -52,18 +52,18 @@ export function RegressionRow({ run }: { run: RegressionRunRead }) {
         <div className="border-t border-border px-3 py-2">
           {run.regression_findings.length > 0 && (
             <div className="mb-2 rounded bg-amber-50 p-2 text-[11px] text-amber-900 dark:bg-amber-950/20 dark:text-amber-300">
-              <strong>Additive violations:</strong> {run.regression_findings.join('; ')}
+              <strong>增量違規:</strong> {run.regression_findings.join('; ')}
             </div>
           )}
           {run.per_case_results.length === 0 ? (
-            <p className="text-[11px] text-muted-foreground">No per-case results recorded.</p>
+            <p className="text-[11px] text-muted-foreground">無 per-case 結果記錄</p>
           ) : (
             <table className="w-full text-[11px]">
               <thead>
                 <tr className="border-b border-border text-left">
                   <th className="py-1 pr-2">Failure ID</th>
-                  <th className="py-1 pr-2">Verdict</th>
-                  <th className="py-1">Reasoning</th>
+                  <th className="py-1 pr-2">判定 Verdict</th>
+                  <th className="py-1">說明 Reasoning</th>
                 </tr>
               </thead>
               <tbody>

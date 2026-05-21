@@ -18,7 +18,7 @@ export function DecisionPanel({ status, onAccept, onReject, isPending, hint }: P
   return (
     <div className="sticky top-2 flex flex-col gap-2 rounded border border-border bg-background p-3 shadow-sm">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-semibold uppercase text-muted-foreground">Decision</span>
+        <span className="text-xs font-semibold uppercase text-muted-foreground">決策 Decision</span>
         <StatusBadge status={status} />
       </div>
       <Button
@@ -29,7 +29,7 @@ export function DecisionPanel({ status, onAccept, onReject, isPending, hint }: P
         disabled={decided || isPending}
         data-testid="accept-button"
       >
-        <Check size={14} className="mr-1" aria-hidden /> Accept → Self-Evolve
+        <Check size={14} className="mr-1" aria-hidden /> 接受 → Self-Evolve
       </Button>
       <Button
         type="button"
@@ -40,7 +40,7 @@ export function DecisionPanel({ status, onAccept, onReject, isPending, hint }: P
         disabled={decided || isPending}
         data-testid="reject-button"
       >
-        <X size={14} className="mr-1" aria-hidden /> Reject
+        <X size={14} className="mr-1" aria-hidden /> 拒絕 Reject
       </Button>
       {hint && <p className="mt-1 text-[11px] leading-snug text-muted-foreground">{hint}</p>}
     </div>

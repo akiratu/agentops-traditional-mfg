@@ -50,9 +50,9 @@ export default function AgentDashboardPage({
       api.patchAgentRuntimeStatus(agentId, { runtime_status: status }),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: qk.agent(agentId) })
-      toast.success('Runtime status updated')
+      toast.success('Runtime 狀態已更新')
     },
-    onError: (err) => toast.error(`Update failed: ${(err as Error).message}`),
+    onError: (err) => toast.error(`更新失敗: ${(err as Error).message}`),
   })
 
   const currentVersion = (() => {
@@ -101,7 +101,7 @@ export default function AgentDashboardPage({
               <CardContent className="p-card pt-0 text-xs text-muted-foreground">
                 <div>{agent.purpose}</div>
                 <div>
-                  Deployed: {agent.deployed_at ? relativeTime(agent.deployed_at) : 'not yet'}
+                  部署時間: {agent.deployed_at ? relativeTime(agent.deployed_at) : '尚未部署'}
                 </div>
               </CardContent>
             </Card>
@@ -111,7 +111,7 @@ export default function AgentDashboardPage({
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div>
-          <h2 className="mb-2 text-sm font-medium">Recent Anomalies</h2>
+          <h2 className="mb-2 text-sm font-medium">最近異常 Recent Anomalies</h2>
           <DataState query={anomaliesQ} isEmpty={(d) => d.length === 0}>
             {(signals) => (
               <ul className="flex flex-col gap-1">
@@ -133,12 +133,12 @@ export default function AgentDashboardPage({
             href="/anomalies"
             className="mt-2 inline-block text-xs text-primary underline-offset-4 hover:underline"
           >
-            View all anomalies →
+            看全部異常 →
           </Link>
         </div>
 
         <div>
-          <h2 className="mb-2 text-sm font-medium">Skill Versions</h2>
+          <h2 className="mb-2 text-sm font-medium">技能版本 Skill Versions</h2>
           <DataState query={skillsQ} isEmpty={(d) => d.length === 0}>
             {(skills) => (
               <ul className="flex flex-col gap-1">
@@ -163,7 +163,7 @@ export default function AgentDashboardPage({
             href={`/skills/${agentId}`}
             className="mt-2 inline-block text-xs text-primary underline-offset-4 hover:underline"
           >
-            View skill timeline + diff →
+            看技能演進 + diff →
           </Link>
         </div>
       </div>

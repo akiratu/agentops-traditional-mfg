@@ -37,7 +37,7 @@ export function AnomalyCard({ signal }: { signal: AnomalySignalRead }) {
             {firstFinding && <ConfidenceBadge value={firstFinding.confidence_score} />}
           </div>
           <div className="truncate text-xs text-muted-foreground">
-            agent {shortId(signal.agent_id)} · {signal.related_trace_refs.length} traces
+            Agent {shortId(signal.agent_id)} · {signal.related_trace_refs.length} traces
           </div>
         </div>
         <div className="text-xs text-muted-foreground">{relativeTime(signal.created_at)}</div>

@@ -12,7 +12,12 @@ test('SOP upload → /skill-generations → redirect to /skills/[agentId]', asyn
 
   await page.goto('/sop-upload')
   await page.getByRole('combobox').first().click()
-  await page.getByRole('option', { name: new RegExp(seed.agentName) }).click()
+  // Radix Select's tall option list + many seeded test agents can leave the
+  // target option outside the viewport in a way Playwright's auto-scroll +
+  // force-click can't recover from. Dispatch a click event directly on the
+  // option element — Radix listens for click/pointerup and updates state.
+  const option = page.getByRole('option', { name: new RegExp(seed.agentName) })
+  await option.dispatchEvent('click')
 
   await page.getByTestId('sop-file-input').setInputFiles(tmpFile)
   await expect(page.getByText(/e2e-sop-/)).toBeVisible()
