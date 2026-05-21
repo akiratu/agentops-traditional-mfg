@@ -102,7 +102,7 @@ export default function SopUploadPage() {
         </div>
       </section>
 
-      <div>
+      <div className="flex flex-col gap-1">
         <Button
           type="button"
           onClick={() => submit.mutate()}
@@ -111,6 +111,24 @@ export default function SopUploadPage() {
         >
           {submit.isPending ? '產生中… (1-3 分鐘)' : '上傳並產生技能'}
         </Button>
+        {(() => {
+          if (submit.isPending) return null
+          const missing: string[] = []
+          if (!agentId) missing.push('選擇 Agent(步驟 1)')
+          if (files.length === 0) missing.push('附至少 1 個 SOP 檔(步驟 2)')
+          if (missing.length === 0) {
+            return (
+              <p className="text-xs text-muted-foreground">
+                按下後 Gemini Pro 開始 mining,約 2-3 分鐘產出新版 skill,完成後自動跳轉
+              </p>
+            )
+          }
+          return (
+            <p className="text-xs text-amber-700 dark:text-amber-400">
+              ⚠ 還需要:{missing.join(' + ')}
+            </p>
+          )
+        })()}
       </div>
     </div>
   )
