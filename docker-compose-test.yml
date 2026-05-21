@@ -1,0 +1,46 @@
+version: "3.9"
+
+services:
+  postgres-test:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: agentops
+      POSTGRES_PASSWORD: agentops_dev
+      POSTGRES_DB: agentops_test
+    ports:
+      - "5434:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+
+  backend-test:
+    image: python:3.11-slim
+    working_dir: /app
+    command: >
+      sh -c "pip install -e packages/agentops_core[dev] &&
+             alembic upgrade head &&
+             uvicorn agentops_core.main:app --host 0.0.0.0 --port 8000"
+    environment:
+      DATABASE_URL: postgresql+psycopg://agentops:agentops_dev@postgres-test:5432/agentops_test
+      LLM_PROVIDER_NAME: fake
+      LANGFUSE_PUBLIC_KEY: dummy
+      LANGFUSE_SECRET_KEY: dummy
+      LANGFUSE_HOST: http://localhost:3000
+    ports:
+      - "8001:8000"
+    depends_on:
+      - postgres-test
+    volumes:
+      - ./:/app
+
+  ui-test:
+    image: node:20-alpine
+    working_dir: /workspace/ui
+    command: sh -c "corepack enable && pnpm install --frozen-lockfile=false && pnpm dev"
+    environment:
+      NEXT_PUBLIC_BACKEND_URL: http://backend-test:8000
+    ports:
+      - "3002:3001"
+    depends_on:
+      - backend-test
+    volumes:
+      - ./:/workspace

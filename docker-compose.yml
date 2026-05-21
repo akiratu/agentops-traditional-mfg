@@ -58,6 +58,23 @@ services:
     ports:
       - "3000:3000"
 
+  ui:
+    image: node:20-alpine
+    container_name: agentops-ui
+    working_dir: /workspace/ui
+    command: sh -c "corepack enable && pnpm install --frozen-lockfile=false && pnpm dev"
+    environment:
+      NEXT_PUBLIC_BACKEND_URL: http://host.docker.internal:8000
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./:/workspace
+    depends_on:
+      postgres:
+        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
 volumes:
   agentops_pg_data:
   agentops_langfuse_db_data:
