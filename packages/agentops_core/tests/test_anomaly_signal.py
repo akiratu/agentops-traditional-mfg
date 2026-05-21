@@ -64,3 +64,51 @@ def test_list_signals_for_agent(client):
     response = client.get(f"/anomaly-signals?agent_id={agent_id}")
     assert response.status_code == 200
     assert len(response.json()) == 2
+
+
+def test_post_status_new_triggers_analyzer(client, monkeypatch):
+    """POST with status=new (default) should schedule the trace analyzer."""
+    from agentops_core.api import anomaly_signal as ep
+    calls = []
+    monkeypatch.setattr(
+        ep,
+        "run_trace_analyzer_for_signal",
+        lambda **kw: calls.append(kw),
+    )
+    agent_id = _create_agent(client)
+    response = client.post(
+        "/anomaly-signals",
+        json={
+            "agent_id": agent_id,
+            "source_type": "metric_drift",
+            "related_trace_refs": [],
+            "status": "new",
+        },
+    )
+    assert response.status_code == 201
+    assert len(calls) == 1, "analyzer should fire when status=new"
+
+
+def test_post_status_resolved_skips_analyzer(client, monkeypatch):
+    """Seed scripts post pre-resolved signals (with a hand-crafted finding
+    attached); the analyzer must NOT run, otherwise it overrides the seeded
+    status back to analyzing and the UI shows a stale spinner."""
+    from agentops_core.api import anomaly_signal as ep
+    calls = []
+    monkeypatch.setattr(
+        ep,
+        "run_trace_analyzer_for_signal",
+        lambda **kw: calls.append(kw),
+    )
+    agent_id = _create_agent(client)
+    response = client.post(
+        "/anomaly-signals",
+        json={
+            "agent_id": agent_id,
+            "source_type": "metric_drift",
+            "related_trace_refs": [],
+            "status": "resolved",
+        },
+    )
+    assert response.status_code == 201
+    assert len(calls) == 0, "analyzer should NOT fire when status=resolved"

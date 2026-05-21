@@ -8,6 +8,7 @@ from agentops_core.models.anomaly_signal import (
     AnomalySignal,
     AnomalySignalCreate,
     AnomalySignalRead,
+    AnomalyStatus,
 )
 from agentops_core.services.anomaly_detector.orchestrator import (
     run_trace_analyzer_for_signal,
@@ -26,7 +27,11 @@ def create_signal(
     session.add(signal)
     session.commit()
     session.refresh(signal)
-    background_tasks.add_task(run_trace_analyzer_for_signal, signal_id=signal.id)
+    # Only fire the trace analyzer for genuinely new/unanalyzed signals.
+    # Demo seed scripts post pre-resolved signals (a hand-crafted finding is
+    # attached separately) and explicitly do NOT want the analyzer to run.
+    if signal.status == AnomalyStatus.NEW:
+        background_tasks.add_task(run_trace_analyzer_for_signal, signal_id=signal.id)
     return signal
 
 
