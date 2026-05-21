@@ -33,7 +33,21 @@ class ApiError extends Error {
 async function extractErrorDetail(res: Response): Promise<string> {
   try {
     const body = (await res.json()) as { detail?: unknown }
-    if (typeof body.detail === 'string') return body.detail
+    if (typeof body.detail === 'string') {
+      const raw = body.detail
+      // Friendlier message for the most common LLM rate-limit failure mode
+      // (Gemini, OpenAI, Anthropic all surface 429 in different shapes; just
+      // look for the keyword instead of parsing the upstream JSON).
+      if (/429|RESOURCE_EXHAUSTED|rate.?limit|quota/i.test(raw)) {
+        const retryMatch = raw.match(/retry in (\d+(\.\d+)?)\s*s/i)
+        const retry = retryMatch ? ` (建議等 ${Math.ceil(parseFloat(retryMatch[1]!))} 秒後再試)` : ''
+        return `LLM 額度暫時用滿了,Gemini 要我們等一下${retry}。先到別頁面看看,稍候重試。`
+      }
+      if (raw.length > 300) {
+        return raw.slice(0, 280) + '… (詳細錯誤在 backend log)'
+      }
+      return raw
+    }
     if (Array.isArray(body.detail)) {
       // FastAPI 422 validation errors: array of { loc, msg, type }
       return body.detail
