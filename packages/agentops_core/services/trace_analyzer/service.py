@@ -25,6 +25,7 @@ from agentops_core.services.trace_analyzer.db_tools import (
     fetch_past_findings_tool,
     fetch_skill_detail_tool,
     fetch_skill_versions_tool,
+    search_knowledge_base_tool,
 )
 from agentops_core.services.trace_analyzer.notebook import build_initial_notebook
 from agentops_core.services.trace_analyzer.output import build_rca_finding_payload
@@ -118,6 +119,9 @@ def analyze_anomaly_signal(
         ),
         "fetch_past_findings": lambda agent_id, k=settings.trace_analyzer_top_k_findings: fetch_past_findings_tool(
             session, agent_id=UUID(agent_id), k=k
+        ),
+        "search_knowledge_base": lambda agent_id, query, top_k=5: search_knowledge_base_tool(
+            session, agent_id=agent_id, query=query, top_k=top_k
         ),
     }
 

@@ -15,6 +15,7 @@ from sqlmodel import Session, select
 from agentops_core.models.anomaly_signal import AnomalySignal
 from agentops_core.models.rca_finding import RCAFinding
 from agentops_core.models.skill import Skill
+from agentops_core.models.agent import Agent
 
 
 def fetch_skill_detail_tool(
@@ -88,6 +89,35 @@ def fetch_past_findings_tool(
     ]
 
 
+def search_knowledge_base_tool(
+    session: Session,
+    *,
+    agent_id: str,
+    query: str,
+    top_k: int = 5,
+) -> list[dict[str, Any]]:
+    """Search the per-factory RAG knowledge base for relevant SOP or past RCA cases.
+
+    Returns a ranked list of { source, document, distance, metadata }.
+    Use this to verify whether the current failure is a *known* gap already
+    covered by an SOP or previously diagnosed RCA finding.
+    """
+    from agentops_core.connectors.rag_store import RAGStore
+    from agentops_core.models.agent import Agent
+    from agentops_core.models.factory import Factory
+
+    agent = session.get(Agent, UUID(agent_id))
+    if agent is None:
+        return []
+
+    factory = session.get(Factory, agent.factory_id)
+    if factory is None:
+        return []
+
+    store = RAGStore(str(factory.id))
+    return store.search(query, top_k=top_k, agent_id=agent_id)
+
+
 DB_TOOL_SCHEMAS: list[dict[str, Any]] = [
     {
         "type": "function",
@@ -138,6 +168,28 @@ DB_TOOL_SCHEMAS: list[dict[str, Any]] = [
                     "k": {"type": "integer", "default": 3},
                 },
                 "required": ["agent_id"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "search_knowledge_base",
+            "description": (
+                "Search the factory's RAG knowledge base (SOP docs + past RCA findings) "
+                "for content semantically related to the failure. "
+                "Use this to check whether the current anomaly is a *known* gap "
+                "already documented in SOP or previously diagnosed. "
+                "Returns ranked chunks with distance scores."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "agent_id": {"type": "string", "description": "Agent UUID to scope the search."},
+                    "query": {"type": "string", "description": "The failure pattern or symptom to search for (Traditional Chinese OK)."},
+                    "top_k": {"type": "integer", "default": 5, "description": "Max chunks to return."},
+                },
+                "required": ["agent_id", "query"],
             },
         },
     },
