@@ -2,10 +2,11 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { AlertTriangle, Factory, FileUp, GitCompare } from 'lucide-react'
+import { AlertTriangle, Factory, FileUp, GitCompare, LayoutDashboard } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const items = [
+  { href: '/dashboard', label: '總覽 Overview', icon: LayoutDashboard },
   { href: '/factories', label: '工廠 Factories', icon: Factory },
   { href: '/anomalies', label: '異常 Anomalies', icon: AlertTriangle },
   { href: '/regression-runs', label: '回歸測試 Regression Runs', icon: GitCompare },
